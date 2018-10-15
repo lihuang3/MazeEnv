@@ -6,8 +6,9 @@ from gym.utils import seeding
 
 from time import sleep
 
-
-
+dir_path = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(dir_path)
+from MazeEnv import *
 
 class MazeEnv_v2(MazeEnv):
     def __init__(self):
