@@ -2,6 +2,9 @@ import numpy as np, random, sys, matplotlib.pyplot as plt, time, os
 import gym
 from gym import error, spaces, utils, core
 from gym.utils import seeding
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(dir_path)
 from MazeEnv import *
 from time import sleep
 
