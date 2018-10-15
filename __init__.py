@@ -9,6 +9,17 @@ register(
     max_episode_steps=1000,
 )
 
+register(
+    id='MazeEnv-v1',
+    entry_point='gym.envs.my_games:MazeEnv_v1',
+    max_episode_steps=1000,
+)
+
+register(
+    id='MazeEnv-v2',
+    entry_point='gym.envs.my_games:MazeEnv_v2',
+    max_episode_steps=1000,
+)
 
 register(
     id='Copy-v0',
