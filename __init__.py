@@ -11,13 +11,19 @@ register(
 
 register(
     id='MazeEnv-v1',
-    entry_point='gym.envs.my_games:MazeEnv_v1',
+    entry_point='gym.envs.my_games:MazeEnv1',
     max_episode_steps=1000,
 )
 
 register(
     id='MazeEnv-v2',
-    entry_point='gym.envs.my_games:MazeEnv_v2',
+    entry_point='gym.envs.my_games:MazeEnv2',
+    max_episode_steps=1000,
+)
+
+register(
+    id='MazeEnv-v3',
+    entry_point='gym.envs.my_games:MazeEnv3',
     max_episode_steps=1000,
 )
 

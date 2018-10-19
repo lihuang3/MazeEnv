@@ -3,6 +3,8 @@ import numpy as np, random, sys, time, os
 import gym
 from gym import error, spaces, utils, core
 from gym.utils import seeding
+import matplotlib.pyplot as plt
+plt.ion()
 
 from time import sleep
 
@@ -10,7 +12,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(dir_path)
 from MazeEnv import *
 
-class MazeEnv_v2(MazeEnv):
+class MazeEnv2(MazeEnv):
     def __init__(self):
         global mazeData, costData, centerline, freespace, mazeHeight, mazeWidth, robot_marker
         dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -106,8 +108,8 @@ class MazeEnv_v2(MazeEnv):
 
         self.output_img = self.state_img + self.maze*255
 
-        state_cost_matrix = self.state * costData/ robot_marker
-        cost_to_go = np.sum(state_cost_matrix)
+        self.state_cost_matrix = self.state * costData/ robot_marker
+        cost_to_go = np.sum(self.state_cost_matrix)
         max_cost_agent = np.max(costData[self.state>0])
 
         done = False
@@ -147,12 +149,36 @@ class MazeEnv_v2(MazeEnv):
         return(np.expand_dims(self.output_img,axis=2),reward,done,info)
 
     def render(self, mode = 'human'):
-        print("")
+        # print("")
+        row, col = np.nonzero(self.state)
+        render_image = np.copy(0*self.state).astype(np.int16)
+        for i in range(row.shape[0]):
+            render_image[row[i]-1:row[i]+2, col[i]-1:col[i]+2] += self.state[row[i],col[i]]*np.ones([3,3]).astype(np.int16)
+
+        row, col = np.nonzero(render_image)
+        min_robots = 150.
+        max_robots = float(np.max(render_image))
+        rgb_render_image = np.stack((render_image+self.maze*255,)*3, -1)
+
+
+
+        for i in range(row.shape[0]):
+            value = render_image[row[i],col[i]]
+            ratio = 2.*(value - min_robots)/(max_robots - min_robots)
+            b = np.uint8(min(max(0, 255*(1-ratio)),255))
+            r = np.uint8(min(max(0, 255*(ratio-1)),255))
+            g = np.uint8(255-b-r)
+
+            for j, rgb in enumerate([r,g,b]):
+                rgb_render_image[row[i], col[i], j] = np.uint8(rgb)
+
+
         # plt.imshow(self.state_img + self.maze*255, vmin=0, vmax=255)
         # plt.imshow(self.output_img)
-        # plt.show(False)
-        # plt.pause(0.0001)
-        # plt.gcf().clear()
+        plt.imshow(rgb_render_image.astype(np.uint8), vmin=0, vmax=255)
+        plt.show(False)
+        plt.pause(0.0001)
+        plt.gcf().clear()
 
     def reset(self):
         return self._build_robot()
@@ -199,6 +225,7 @@ class MazeEnv_v2(MazeEnv):
 def main(MazeEnv):
     env = MazeEnv()
     env.render()
+    plt.pause(2)
 
     n_epochs = 10000
     robot_loc =[]
@@ -224,6 +251,6 @@ def main(MazeEnv):
 
 
 if __name__ == '__main__':
-    main(MazeEnv_v2)
+    main(MazeEnv2)
 
 
