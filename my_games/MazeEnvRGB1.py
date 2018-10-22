@@ -1,25 +1,26 @@
 """
-  gym id: MazeEnv-v1
-  Input: gray-scale images
-  Reward: region range basis (easy)
-  Render: gray-scale visualization
-  Training: from scratch
+  gym id: MazeEnvRGB-v1
+  Input: RGB images
+  Reward: Farthest agent determined (hard) + region range basis (easy)
+  Training: finetuning
 """
 
-import numpy as np, random, sys, matplotlib.pyplot as plt, time, os
+import numpy as np, random, sys, time, os
 import gym
 from gym import error, spaces, utils, core
 from gym.utils import seeding
+import matplotlib.pyplot as plt
+
+plt.ion()
+
+from time import sleep
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(dir_path)
 from MazeEnv import *
-from time import sleep
-
-plt.ion()
 
 
-class MazeEnv1(MazeEnv):
+class MazeEnvRGB1(MazeEnv):
   def __init__(self):
     global mazeData, costData, centerline, freespace, mazeHeight, mazeWidth, robot_marker
     dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -28,6 +29,7 @@ class MazeEnv1(MazeEnv):
 
     robot_marker = 150
     self.goal_range = 10
+    self.agg_rate = 0.0
     self.actions = [1, 2, 3, 4]  # {up, down, left ,right}
     self.action_dict = {0: (-1, 0), 1: (1, 0), 2: (-1, 1), 3: (1, 1)}  # {up, down, left ,right}
     self.n_actions = len(self.actions)
@@ -112,47 +114,80 @@ class MazeEnv1(MazeEnv):
 
     self.output_img = self.state_img + self.maze * 255
 
-    state_cost_matrix = self.state * costData / robot_marker
-    cost_to_go = np.sum(state_cost_matrix)
+    # Gray-scale image
+    render_image = np.copy(0 * self.state).astype(np.int16)
+    for i in range(row.shape[0]):
+      render_image[row[i] - 1:row[i] + 2, col[i] - 1:col[i] + 2] += self.state[row[i], col[i]] * np.ones([3, 3]).astype(
+        np.int16)
+
+    row, col = np.nonzero(render_image)
+
+    min_robots = 150.* 1
+    max_robots = 150.* self.robot_num * 0.20
+
+    rgb_render_image = np.stack((render_image.astype(np.uint8) + self.maze * 255,) * 3, -1)
+
+    for i in range(row.shape[0]):
+      value = render_image[row[i], col[i]]
+      ratio = 2. * (value - min_robots) / (max_robots - min_robots)
+      b = np.uint8(min(max(0, 255 * (1 - ratio)), 255))
+      r = np.uint8(min(max(0, 255 * (ratio - 1)), 255))
+      g = np.uint8(255 - b - r)
+
+      for j, rgb in enumerate([r, g, b]):
+        rgb_render_image[row[i], col[i], j] = np.uint8(rgb)
+
+    self.output_img = rgb_render_image
+
+    self.state_cost_matrix = self.state * costData / robot_marker
+
+    self.agg_rate = np.sum( self.state[np.array(costData)<=self.goal_range]  / robot_marker) / self.robot_num
+
+    cost_to_go = np.sum(self.state_cost_matrix)
     max_cost_agent = np.max(costData[self.state > 0])
 
     done = False
     reward = -.1
 
-    # if max_cost_agent<=self.goal_range:
-    #     done = True
-    #     reward = 200
-    # elif max_cost_agent<=2*self.goal_range and not self.reward_grad[0]:
-    #     self.reward_grad[0] = 1
-    #     reward = 16
-    # elif max_cost_agent <= 3*self.goal_range and not self.reward_grad[1]:
-    #     self.reward_grad[1] = 1
-    #     reward = 8
-    # elif max_cost_agent <= 4*self.goal_range and not self.reward_grad[2]:
-    #     self.reward_grad[2] = 1
-    #     reward = 8
-    # elif max_cost_agent <= 6*self.goal_range and not self.reward_grad[3]:
-    #     self.reward_grad[3] = 1
-    #     reward = 4
-
-    if cost_to_go <= 2 * self.goal_range * self.robot_num and not self.reward_grad[4]:
-      self.reward_grad[4] = 1
+    if max_cost_agent <= self.goal_range:
       done = True
-      reward = 100  # 8
-    elif cost_to_go <= 4 * self.goal_range * self.robot_num and not self.reward_grad[5]:
+      reward = 200
+    elif max_cost_agent <= 2 * self.goal_range and not self.reward_grad[0]:
+      self.reward_grad[0] = 1
+      reward = 16
+    elif max_cost_agent <= 3 * self.goal_range and not self.reward_grad[1]:
+      self.reward_grad[1] = 1
+      reward = 8
+    elif max_cost_agent <= 4 * self.goal_range and not self.reward_grad[2]:
+      self.reward_grad[2] = 1
+      reward = 8
+    elif max_cost_agent <= 6 * self.goal_range and not self.reward_grad[3]:
+      self.reward_grad[3] = 1
+      reward = 4
+
+    if cost_to_go <= self.goal_range * self.robot_num and not self.reward_grad[4]:
+      done = False
+      self.reward_grad[4] = 1
+      reward = 8
+    elif cost_to_go <= 2 * self.goal_range * self.robot_num and not self.reward_grad[5]:
+      done = False
       self.reward_grad[5] = 1
-      reward = 20  # 4
-    elif cost_to_go <= 6 * self.goal_range * self.robot_num and not self.reward_grad[6]:
+      reward = 4
+    elif cost_to_go <= 4 * self.goal_range * self.robot_num and not self.reward_grad[6]:
+      done = False
       self.reward_grad[6] = 1
-      reward = 5  # 2
+      reward = 2
+
 
     info = {}
 
-    return (np.expand_dims(self.output_img, axis=2), reward, done, info)
+    return (self.output_img, reward, done, info)
 
   def render(self, mode='human'):
-    # plt.imshow(self.state_img + self.maze*255, vmin=0, vmax=255)
-    plt.imshow(self.output_img)
+    # print("")
+
+    plt.text(35, 5, "Agg. rate %.1f"%(100.*self.agg_rate)+"%", fontsize = 12)
+    plt.imshow(self.output_img.astype(np.uint8), vmin=0, vmax=255)
     plt.show(False)
     plt.pause(0.0001)
     plt.gcf().clear()
@@ -203,6 +238,7 @@ def main(MazeEnv):
   env = MazeEnv()
   env.render()
   plt.pause(2)
+
   n_epochs = 10000
   robot_loc = []
   steps = 0
@@ -226,6 +262,6 @@ def main(MazeEnv):
 
 
 if __name__ == '__main__':
-  main(MazeEnv1)
+  main(MazeEnvRGB1)
 
 

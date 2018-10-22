@@ -1,4 +1,10 @@
-
+"""
+  gym id: MazeEnv-v0
+  Input: gray-scale images
+  Reward: region range basis (easy)
+  Render: gray-scale visualization
+  Training: from scratch
+"""
 import numpy as np, random, sys, matplotlib.pyplot as plt, time, os
 import gym
 from gym import error, spaces, utils, core

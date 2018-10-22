@@ -15,6 +15,7 @@ register(
     max_episode_steps=1000,
 )
 
+
 register(
     id='MazeEnv-v2',
     entry_point='gym.envs.my_games:MazeEnv2',
@@ -24,6 +25,30 @@ register(
 register(
     id='MazeEnv-v3',
     entry_point='gym.envs.my_games:MazeEnv3',
+    max_episode_steps=1000,
+)
+
+register(
+    id='MazeEnv-v4',
+    entry_point='gym.envs.my_games:MazeEnv4',
+    max_episode_steps=1000,
+)
+
+register(
+    id='MazeEnvRGB-v0',
+    entry_point='gym.envs.my_games:MazeEnvRGB0',
+    max_episode_steps=1000,
+)
+
+register(
+    id='MazeEnvRGB-v1',
+    entry_point='gym.envs.my_games:MazeEnvRGB1',
+    max_episode_steps=1000,
+)
+
+register(
+    id='MazeEnvRGB-v2',
+    entry_point='gym.envs.my_games:MazeEnvRGB2',
     max_episode_steps=1000,
 )
 

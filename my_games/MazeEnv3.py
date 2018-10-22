@@ -1,3 +1,12 @@
+"""
+  gym id: MazeEnv-v3
+  Input: gray-scale images
+  Render: RGB visualization
+  Reward: Farthest agent determined (hard) + region range basis (easy)
+  Training: finetuning
+
+"""
+
 import numpy as np, random, sys, time, os
 import gym
 from gym import error, spaces, utils, core
