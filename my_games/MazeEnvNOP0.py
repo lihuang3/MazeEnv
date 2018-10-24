@@ -1,6 +1,6 @@
 """
-  gym id: MazeEnvRGB-v0
-  Input: RGB images
+  gym id: MazeEnvNOP-v0
+  Input: grayscale images
   Reward: region range basis (easy)
   Training: from scratch
 """
