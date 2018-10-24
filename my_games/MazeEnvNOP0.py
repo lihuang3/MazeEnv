@@ -28,7 +28,7 @@ class MazeEnvNOP0(MazeEnv):
     self.map_data_dir = dir_path + '/MapData'
     self.satur = 0.02
     robot_marker = 150
-    self.goal_range = 10
+    self.goal_range = 20
     self.agg_rate = 0.0
     self.actions = [1, 2, 3, 4]  # {up, down, left ,right}
     self.action_dict = {0: (-1, 0), 1: (1, 0), 2: (-1, 1), 3: (1, 1)}  # {up, down, left ,right}
