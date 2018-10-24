@@ -151,7 +151,7 @@ class MazeEnvNOP0(MazeEnv):
 
     info = {}
 
-    return (self.output_img, reward, done, info)
+    return (np.expand_dims(self.output_img,axis=2), reward, done, info)
 
   def render(self, mode='human'):
     # print("")
