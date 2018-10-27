@@ -10,6 +10,8 @@ import numpy as np, random, sys, time, os
 import gym
 from gym import error, spaces, utils, core
 from gym.utils import seeding
+import matplotlib as mpl
+mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 
 plt.ion()
@@ -67,7 +69,7 @@ class MazeEnv4(MazeEnv):
     #     self.state = self.init_state
     #     self.state_img = self.init_state_img
     # except AttributeError:
-    self.robot_num = 64  # len(row)
+    self.robot_num = 100  # len(row)
     self.robot = random.sample(range(row.shape[0]), self.robot_num)
     self.state = np.zeros(np.shape(mazeData)).astype(int)
     self.state_img = np.copy(self.state)
@@ -168,7 +170,9 @@ class MazeEnv4(MazeEnv):
     row, col = np.nonzero(render_image)
     min_robots = 150.
     max_robots = float(np.max(render_image))
-    rgb_render_image = np.stack((render_image + self.maze * 255,) * 3, -1)
+    tmp = np.copy(self.maze)
+    tmp[tmp==0] = 255
+    rgb_render_image = np.stack((render_image + tmp,) * 3, -1)
 
     for i in range(row.shape[0]):
       value = render_image[row[i], col[i]]
@@ -182,7 +186,7 @@ class MazeEnv4(MazeEnv):
 
     # plt.imshow(self.state_img + self.maze*255, vmin=0, vmax=255)
     # plt.imshow(self.output_img)
-    plt.text(35, 5, "Agg. rate %.1f"%(100.*self.agg_rate)+"%", fontsize = 12)
+    plt.text(35, 5, "Agg. rate %.1f"%(100.*self.agg_rate)+"%", fontsize = 12, color='white')
     plt.imshow(rgb_render_image.astype(np.uint8), vmin=0, vmax=255)
     plt.show(False)
     plt.pause(0.0001)

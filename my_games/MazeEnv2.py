@@ -10,6 +10,8 @@ import numpy as np, random, sys, time, os
 import gym
 from gym import error, spaces, utils, core
 from gym.utils import seeding
+import matplotlib as mpl
+mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 plt.ion()
 

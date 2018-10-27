@@ -5,6 +5,8 @@
   Render: gray-scale visualization
   Training: from scratch
 """
+import matplotlib as mpl
+mpl.use('TkAgg')
 import numpy as np, random, sys, matplotlib.pyplot as plt, time, os
 import gym
 from gym import error, spaces, utils, core

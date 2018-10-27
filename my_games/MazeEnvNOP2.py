@@ -9,6 +9,8 @@ import numpy as np, random, sys, time, os
 import gym
 from gym import error, spaces, utils, core
 from gym.utils import seeding
+import matplotlib as mpl
+mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 
 plt.ion()
@@ -26,7 +28,7 @@ class MazeEnvNOP2(MazeEnv):
     dir_path = os.path.dirname(os.path.realpath(__file__))
 
     self.map_data_dir = dir_path + '/MapData'
-    self.satur = 0.02
+    self.satur = 0.05
     robot_marker = 150
     self.goal_range = 10
     self.agg_rate = 0.0
@@ -66,7 +68,7 @@ class MazeEnvNOP2(MazeEnv):
     #     self.state = self.init_state
     #     self.state_img = self.init_state_img
     # except AttributeError:
-    self.robot_num = 100  # len(row)
+    self.robot_num = 64  # len(row)
     self.robot = random.sample(range(row.shape[0]), self.robot_num)
     self.state = np.zeros(np.shape(mazeData)).astype(int)
     self.state_img = np.copy(self.state)
@@ -132,7 +134,7 @@ class MazeEnvNOP2(MazeEnv):
 
     self.state_cost_matrix = self.state * costData / robot_marker
 
-    self.agg_rate = np.sum( self.state[np.array(costData)<=self.goal_range]  / robot_marker) / self.robot_num
+    self.agg_rate = np.sum( self.state[np.array(costData)<=self.goal_range] / robot_marker) / self.robot_num
 
     cost_to_go = np.sum(self.state_cost_matrix)
 

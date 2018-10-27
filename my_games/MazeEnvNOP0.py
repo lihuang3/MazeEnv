@@ -9,6 +9,8 @@ import numpy as np, random, sys, time, os
 import gym
 from gym import error, spaces, utils, core
 from gym.utils import seeding
+import matplotlib as mpl
+mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 
 plt.ion()
@@ -26,7 +28,7 @@ class MazeEnvNOP0(MazeEnv):
     dir_path = os.path.dirname(os.path.realpath(__file__))
 
     self.map_data_dir = dir_path + '/MapData'
-    self.satur = 0.02
+    self.satur = 0.05
     robot_marker = 150
     self.goal_range = 20
     self.agg_rate = 0.0

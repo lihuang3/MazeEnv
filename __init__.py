@@ -35,22 +35,23 @@ register(
 )
 
 register(
+    id='MazeEnvNOP-v0',
+    entry_point='gym.envs.my_games:MazeEnvNOP0',
+    max_episode_steps=1000,
+)
+
+register(
+    id='MazeEnvNOP-v2',
+    entry_point='gym.envs.my_games:MazeEnvNOP2',
+    max_episode_steps=1000,
+)
+
+register(
     id='MazeEnvRGB-v0',
     entry_point='gym.envs.my_games:MazeEnvRGB0',
     max_episode_steps=1000,
 )
 
-register(
-    id='MazeEnvRGB-v1',
-    entry_point='gym.envs.my_games:MazeEnvRGB1',
-    max_episode_steps=1000,
-)
-
-register(
-    id='MazeEnvRGB-v2',
-    entry_point='gym.envs.my_games:MazeEnvRGB2',
-    max_episode_steps=1000,
-)
 
 register(
     id='Copy-v0',
