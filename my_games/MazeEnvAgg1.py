@@ -1,9 +1,9 @@
 """
-  Task: aggregation (any place)
-  gym id: MazeEnvAgg-v0
+  Task: Aggregation (anyplace)
+  gym id: MazeEnvAgg-v1
   Input: grayscale images
   Reward:
-  Training: from scratch
+  Training: transfer
 """
 
 import numpy as np, random, sys, time, os
@@ -23,7 +23,7 @@ sys.path.append(dir_path)
 from MazeEnv import *
 
 
-class MazeEnvAgg0(MazeEnv):
+class MazeEnvAgg1(MazeEnv):
   def __init__(self):
     global mazeData, costData, centerline, freespace, mazeHeight, mazeWidth, robot_marker
     dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -141,17 +141,18 @@ class MazeEnvAgg0(MazeEnv):
     done = False
     reward = -.25
 
-    if self.agg_rate <= 0.15:
+    if self.agg_rate <= 0.10:
       done = True
-      reward = 128
-    elif self.agg_rate <= 0.25 and not self.reward_grad[0]:
+      reward = 256
+    elif self.agg_rate <= 0.15 and not self.reward_grad[0]:
       self.reward_grad[0] = 1
+      reward = 32
+    elif self.agg_rate <=0.25 and not self.reward_grad[1]:
+      self.reward_grad[1] = 1
       reward = 16
-    elif self.agg_rate <=0.4 and not self.reward_grad[1]:
+    elif self.agg_rate <=0.35 and not self.reward_grad[1]:
       self.reward_grad[1] = 1
       reward = 8
-
-
 
     info = {}
 
@@ -263,6 +264,6 @@ def main(MazeEnv):
 
 
 if __name__ == '__main__':
-  main(MazeEnvAgg0)
+  main(MazeEnvAgg1)
 
 
