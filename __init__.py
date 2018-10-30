@@ -46,6 +46,11 @@ register(
     max_episode_steps=1000,
 )
 
+register(
+    id='MazeEnvNOP-v10',
+    entry_point='gym.envs.my_games:MazeEnvNOP10',
+    max_episode_steps=2000,
+)
 
 register(
     id='MazeEnvAgg-v0',

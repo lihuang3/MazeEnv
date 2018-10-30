@@ -7,6 +7,8 @@ from gym.envs.my_games.MazeEnv4 import MazeEnv4
 from gym.envs.my_games.MazeEnvNOP0 import MazeEnvNOP0
 from gym.envs.my_games.MazeEnvNOP2 import MazeEnvNOP2
 
+from gym.envs.my_games.MazeEnvNOP10 import MazeEnvNOP10
+
 from gym.envs.my_games.MazeEnvAgg0 import MazeEnvAgg0
 from gym.envs.my_games.MazeEnvAgg1 import MazeEnvAgg1
 
