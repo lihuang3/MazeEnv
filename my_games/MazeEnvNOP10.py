@@ -143,20 +143,23 @@ class MazeEnvNOP10(MazeEnv):
 
     if cost_to_go <= self.goal_range * self.robot_num:
       done = True
-      reward = 100.0
+      reward = 200.0
     elif cost_to_go <= 2 * self.goal_range * self.robot_num and not self.reward_grad[0]:
       self.reward_grad[0] = 1
       reward = 20.0
-    elif cost_to_go <= 3 * self.goal_range and not self.reward_grad[1]:
+    elif cost_to_go <= 3 * self.goal_range * self.robot_num and not self.reward_grad[1]:
       self.reward_grad[1] = 1
-      reward = 5.0
+      reward = 10.0
+    elif cost_to_go <= 5 * self.goal_range * self.robot_num and not self.reward_grad[2]:
+      self.reward_grad[2] = 1
+      reward = 10.0
 
     info = {}
 
     return (np.expand_dims(self.output_img,axis=2), reward, done, info)
 
   def render(self, mode='human'):
-    # print("")
+    plt.gcf().clear()
     row, col = np.nonzero(self.state)
     render_image = np.copy(self.state).astype(np.int16)
     for i in range(row.shape[0]):
@@ -174,10 +177,11 @@ class MazeEnvNOP10(MazeEnv):
 
     for i in range(row.shape[0]):
       value = render_image[row[i], col[i]]
-      ratio = 2. * (value - min_robots) / (max_robots - min_robots)
-      b = np.uint8(min(max(0, 255 * (1 - ratio)), 255))
-      r = np.uint8(min(max(0, 255 * (ratio - 1)), 255))
-      g = np.uint8(255 - b - r)
+      ratio = 0.4+0.5 * max(value - min_robots,0) / (max_robots - min_robots)
+      ratio = min(0.9, max(0.4,ratio))
+      b = 255
+      g = 255*(1-ratio)
+      r = 255*(1-ratio)
 
       for j, rgb in enumerate([r, g, b]):
         rgb_render_image[row[i], col[i], j] = np.uint8(rgb)
@@ -189,7 +193,7 @@ class MazeEnvNOP10(MazeEnv):
     plt.text(35, 5, "Agg. rate %.1f"%(100.*self.agg_rate)+"%", fontsize = 12, color='white')
     plt.show(False)
     plt.pause(0.0001)
-    plt.gcf().clear()
+
 
   def reset(self):
     return self._build_robot()

@@ -28,7 +28,7 @@ class MazeEnvNOP2(MazeEnv):
     dir_path = os.path.dirname(os.path.realpath(__file__))
 
     self.map_data_dir = dir_path + '/MapData'
-    self.satur = 0.05
+    self.satur = 0.08
     robot_marker = 150
     self.goal_range = 10
     self.agg_rate = 0.0
@@ -68,7 +68,7 @@ class MazeEnvNOP2(MazeEnv):
     #     self.state = self.init_state
     #     self.state_img = self.init_state_img
     # except AttributeError:
-    self.robot_num = 64  # len(row)
+    self.robot_num = 100  # len(row)
     self.robot = random.sample(range(row.shape[0]), self.robot_num)
     self.state = np.zeros(np.shape(mazeData)).astype(int)
     self.state_img = np.copy(self.state)
@@ -76,7 +76,6 @@ class MazeEnvNOP2(MazeEnv):
       self.state[row[self.robot[i]], col[self.robot[i]]] += robot_marker
       self.state_img[row[self.robot[i]] - 1:row[self.robot[i]] + 2,
       col[self.robot[i]] - 1:col[self.robot[i]] + 2] = robot_marker * np.ones([3, 3])
-    self.state_img = self.state
     self.init_state = self.state
     self.init_state_img = self.state_img
 
@@ -176,9 +175,9 @@ class MazeEnvNOP2(MazeEnv):
     return (np.expand_dims(self.output_img,axis=2), reward, done, info)
 
   def render(self, mode='human'):
-    # print("")
+    plt.gcf().clear()
     row, col = np.nonzero(self.state)
-    render_image = np.copy(self.state).astype(np.int16)
+    render_image = 0*np.copy(self.state).astype(np.int16)
     for i in range(row.shape[0]):
      render_image[row[i] - 1:row[i] + 2, col[i] - 1:col[i] + 2] += self.state[row[i], col[i]] * np.ones([3, 3]).astype(
        np.int16)
@@ -194,10 +193,11 @@ class MazeEnvNOP2(MazeEnv):
 
     for i in range(row.shape[0]):
       value = render_image[row[i], col[i]]
-      ratio = 2. * (value - min_robots) / (max_robots - min_robots)
-      b = np.uint8(min(max(0, 255 * (1 - ratio)), 255))
-      r = np.uint8(min(max(0, 255 * (ratio - 1)), 255))
-      g = np.uint8(255 - b - r)
+      ratio = 0.4+0.5 * max(value - min_robots,0) / (max_robots - min_robots)
+      ratio = min(0.9, max(0.4,ratio))
+      b = 255
+      g = 255*(1-ratio)
+      r = 255*(1-ratio)
 
       for j, rgb in enumerate([r, g, b]):
         rgb_render_image[row[i], col[i], j] = np.uint8(rgb)
@@ -209,7 +209,7 @@ class MazeEnvNOP2(MazeEnv):
     plt.text(35, 5, "Agg. rate %.1f"%(100.*self.agg_rate)+"%", fontsize = 12, color='white')
     plt.show(False)
     plt.pause(0.0001)
-    plt.gcf().clear()
+
 
   def reset(self):
     return self._build_robot()
