@@ -162,7 +162,7 @@ class MazeEnvAgg1(MazeEnv):
     plt.gcf().clear()
 
     row, col = np.nonzero(self.state)
-    render_image = np.copy(self.state).astype(np.int16)
+    render_image = 0*np.copy(self.state).astype(np.int16)
     for i in range(row.shape[0]):
      render_image[row[i] - 1:row[i] + 2, col[i] - 1:col[i] + 2] += self.state[row[i], col[i]] * np.ones([3, 3]).astype(
        np.int16)
