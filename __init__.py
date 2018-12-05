@@ -5,7 +5,7 @@ from gym.envs.registration import registry, register, make, spec
 register(
     id='Maze1203Env-v3',
     entry_point='gym.envs.my_games:Maze1203Env3',
-    max_episode_steps=2000,
+    max_episode_steps=1600,
 )
 
 register(
