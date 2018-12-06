@@ -5,7 +5,7 @@ from gym.envs.registration import registry, register, make, spec
 register(
     id='FishWeir-v0',
     entry_point='gym.envs.my_games:FishWeirEnv',
-    max_episode_steps=1000,
+    max_episode_steps=1500,
 )
 
 register(
