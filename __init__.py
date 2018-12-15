@@ -3,6 +3,12 @@ from gym.envs.registration import registry, register, make, spec
 # Algorithmic
 # ----------------------------------------
 register(
+    id='Maze1203AggEnv-v0',
+    entry_point='gym.envs.my_games:Maze1203AggEnv',
+    max_episode_steps=2000,
+)
+
+register(
     id='FishWeir-v0',
     entry_point='gym.envs.my_games:FishWeirEnv',
     max_episode_steps=1500,
