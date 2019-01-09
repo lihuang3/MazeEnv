@@ -25,7 +25,7 @@ class Maze1218Env(core.Env):
         self.map_data_dir = dir_path+'/MapData'
 
         robot_marker = 150
-        self.goal_range = 15
+        self.goal_range = 20
         self.actions = [0, 1, 2, 3, 4, 5, 6, 7] # {N, NE, E, SE, S, SW, W, NW}
         # self.action_dict = {0: (-1, 0), 1: (1, 0), 2: (-1, 1), 3: (1, 1)}  # {up, down, left ,right}
         self.action_map = {0: (1, 0),  1: (1, 1),  2: (0, 1), 3: (-1, 1),
@@ -124,7 +124,9 @@ class Maze1218Env(core.Env):
             reward += 16
         elif max_cost_agent <= 16 * self.goal_range and not self.reward_grad[4]:
             self.reward_grad[4] = 1
-            reward += 8
+            reward += 8        
+            done = True
+            return done, reward 
         elif max_cost_agent <= 20 * self.goal_range and not self.reward_grad[10]:
             self.reward_grad[10] = 1
             reward += 8
