@@ -1,7 +1,18 @@
 from gym.envs.registration import registry, register, make, spec
 
-# Algorithmic
+# Swarm Path Planning
 # ----------------------------------------
+register(
+    id='Maze0110Env-v0',
+    entry_point='gym.envs.my_games:Maze0110Env',
+    max_episode_steps=2500,
+)
+
+register(
+    id='Maze1218Env-v0',
+    entry_point='gym.envs.my_games:Maze1218Env',
+    max_episode_steps=2500,
+)
 register(
     id='Maze1218Env-v0',
     entry_point='gym.envs.my_games:Maze1218Env',
@@ -120,7 +131,8 @@ register(
     max_episode_steps=1000,
 )
 
-
+# Algorithmic
+# ----------------------------------------
 register(
     id='Copy-v0',
     entry_point='gym.envs.algorithmic:CopyEnv',
