@@ -11,7 +11,7 @@ register(
 register(
     id='Maze0110Env-v1',
     entry_point='gym.envs.my_games:Maze0110Env1',
-    max_episode_steps=3000,
+    max_episode_steps=5000,
 )
 
 register(
