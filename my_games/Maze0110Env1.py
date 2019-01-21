@@ -104,7 +104,7 @@ class Maze0110Env1(core.Env):
         max_cost_agent = np.max(costData[self.loc[:, 0], self.loc[:, 1]])
 
         done = False
-        reward = -0.1
+        reward = 0.0
 
         if max_cost_agent <= self.goal_range:
             done = True
