@@ -122,57 +122,51 @@ class Maze0110Env2(core.Env):
 
         if max_cost_agent <= self.goal_range:
             done = True
-            reward += 500
+            reward += 200
             return done, reward
         elif max_cost_agent <= 2 * self.goal_range and not self.reward_grad[0]:
             self.reward_grad[0] = 1
-            reward += 32
+            reward += 16
         elif max_cost_agent <= 4 * self.goal_range and not self.reward_grad[1]:
             self.reward_grad[1] = 1
-            reward += 32
+            reward += 16
         elif max_cost_agent <= 8 * self.goal_range and not self.reward_grad[2]:
             self.reward_grad[2] = 1
-            reward += 16
+            reward += 8
         elif max_cost_agent <= 12 * self.goal_range and not self.reward_grad[3]:
             self.reward_grad[3] = 1
-            reward += 16
-        elif max_cost_agent <= 14 * self.goal_range and not self.reward_grad[18]:
-            self.reward_grad[18] = 1
             reward += 8
-        elif max_cost_agent <= 16 * self.goal_range and not self.reward_grad[4]:
+        elif max_cost_agent <= 14 * self.goal_range and not self.reward_grad[4]:
             self.reward_grad[4] = 1
             reward += 8
-        elif max_cost_agent <= 20 * self.goal_range and not self.reward_grad[10]:
+        elif max_cost_agent <= 16 * self.goal_range and not self.reward_grad[5]:
+            self.reward_grad[5] = 1
+            reward += 4        
+        elif max_cost_agent <= 20 * self.goal_range and not self.reward_grad[6]:
+            self.reward_grad[6] = 1
+            reward += 4
+
+        if cost_to_go <= self.goal_range * self.robot_num and not self.reward_grad[10]:
             self.reward_grad[10] = 1
             reward += 8
-        elif max_cost_agent <= 24 * self.goal_range and not self.reward_grad[11]:
-          self.reward_grad[11] = 1
-          reward += 8
-
-        if cost_to_go <= self.goal_range * self.robot_num and not self.reward_grad[5]:
-            self.reward_grad[5] = 1
-            reward += 16
-        elif cost_to_go <= 2 * self.goal_range * self.robot_num and not self.reward_grad[6]:
-            self.reward_grad[6] = 1
-            reward += 16
-        elif cost_to_go <= 4 * self.goal_range * self.robot_num and not self.reward_grad[7]:
-            self.reward_grad[7] = 1
+        elif cost_to_go <= 2 * self.goal_range * self.robot_num and not self.reward_grad[11]:
+            self.reward_grad[11] = 1
             reward += 8
-        elif cost_to_go <= 8 * self.goal_range * self.robot_num and not self.reward_grad[8]:
-            self.reward_grad[8] = 1
-            reward += 8
-        elif cost_to_go <= 12 * self.goal_range * self.robot_num and not self.reward_grad[9]:
-            self.reward_grad[9] = 1
-            reward += 8
+        elif cost_to_go <= 4 * self.goal_range * self.robot_num and not self.reward_grad[12]:
+            self.reward_grad[12] = 1
+            reward += 4
+        elif cost_to_go <= 8 * self.goal_range * self.robot_num and not self.reward_grad[13]:
+            self.reward_grad[13] = 1
+            reward += 4
+        elif cost_to_go <= 12 * self.goal_range * self.robot_num and not self.reward_grad[14]:
+            self.reward_grad[14] = 1
+            reward += 4
         elif cost_to_go <= 16 * self.goal_range * self.robot_num and not self.reward_grad[15]:
             self.reward_grad[15] = 1
-            reward += 4
+            reward += 2
         elif cost_to_go <= 20 * self.goal_range * self.robot_num and not self.reward_grad[16]:
             self.reward_grad[16] = 1
-            reward += 4
-        elif cost_to_go <= 24 * self.goal_range * self.robot_num and not self.reward_grad[17]:
-            self.reward_grad[17] = 1
-            reward += 4
+            reward += 2
 
         return done, reward
 
