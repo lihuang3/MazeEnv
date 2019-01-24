@@ -33,7 +33,7 @@ class TimeLimit(Wrapper):
         self._elapsed_steps += 1
 
         if self._past_limit():
-            if random.random()>=0.95:
+            if random.random()>=0.85:
                 self._elapsed_steps = 0
                 # self.env.transfer_learning()
             else:
