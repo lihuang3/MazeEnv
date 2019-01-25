@@ -26,6 +26,9 @@ from gym.envs.my_games.Maze0110Env import Maze0110Env
 from gym.envs.my_games.Maze0110Env1 import Maze0110Env1
 from gym.envs.my_games.Maze0110Env2 import Maze0110Env2
 
+from gym.envs.my_games.Maze0122Env import Maze0122Env
+
+
 from gym.envs.my_games.Maze1203AggEnv import Maze1203AggEnv
 
 from gym.envs.my_games.FishWeirEnv import FishWeirEnv
