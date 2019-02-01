@@ -11,13 +11,13 @@ register(
 register(
     id='Maze0122Env-v1',
     entry_point='gym.envs.my_games:Maze0122Env1',
-    max_episode_steps=3600,
+    max_episode_steps=2800,
 )
 
 register(
     id='Maze0122Env-v2',
     entry_point='gym.envs.my_games:Maze0122Env2',
-    max_episode_steps=3200,
+    max_episode_steps=2400,
 )
 
 
