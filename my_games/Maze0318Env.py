@@ -1,10 +1,11 @@
 """
-  gym id: Maze0122Env-v1
+  gym id: Maze0318Env-v0
   Input: gray-scale images
   Reward: region range basis (easy)
   Render: gray-scale visualization
   Training: from scratch
 """
+
 import matplotlib as mpl
 mpl.use('TkAgg')
 import numpy as np, random, sys, matplotlib.pyplot as plt, time, os
@@ -16,8 +17,7 @@ from time import sleep
 plt.ion()
 
 
-
-class Maze0122Env1(core.Env):
+class Maze0318Env(core.Env):
     def __init__(self):
         global mazeData, costData, freespace, mazeHeight, mazeWidth, robot_marker
         dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -25,7 +25,7 @@ class Maze0122Env1(core.Env):
         self.map_data_dir = dir_path+'/MapData'
 
         robot_marker = 150
-        self.goal_range = 20
+        self.goal_range = 10
         self.actions = [0, 1, 2, 3, 4, 5, 6, 7] # {N, NE, E, SE, S, SW, W, NW}
         # self.action_dict = {0: (-1, 0), 1: (1, 0), 2: (-1, 1), 3: (1, 1)}  # {up, down, left ,right}
         self.action_map = {0: (1, 0),  1: (1, 1),  2: (0, 1), 3: (-1, 1),
@@ -41,7 +41,7 @@ class Maze0122Env1(core.Env):
         self.maze = np.ones((mazeHeight, mazeWidth))-mazeData
         self.freespace = np.ones((mazeHeight, mazeWidth))-freespace
 
-        self.goal = np.array([204, 96])
+        self.goal = np.array([80, 82])
         self.init_state = []
         self.reset()
 
@@ -51,7 +51,7 @@ class Maze0122Env1(core.Env):
 
 
     def _load_data(self, data_directory):
-        filename = 'map0122'
+        filename = 'map0318'
         mazeData = np.loadtxt(data_directory + '/'+filename+'.csv').astype(int)
         freespace = np.loadtxt(data_directory + '/'+filename+'_freespace.csv').astype(int)
         costData = np.loadtxt(data_directory + '/' +filename+ '_costmap.csv').astype(int)
@@ -65,7 +65,7 @@ class Maze0122Env1(core.Env):
       # ======================
         row, col = np.nonzero(freespace)
         self.reward_grad = np.zeros(40).astype(np.uint8)
-        self.robot_num = 512 #len(row)
+        self.robot_num = 256 #len(row)
         self.robot = random.sample(range(row.shape[0]), self.robot_num)
         self.state = np.zeros(np.shape(mazeData)).astype(int)
         self.state_img = np.copy(self.state)
@@ -73,8 +73,9 @@ class Maze0122Env1(core.Env):
         for i in range(self.robot_num):
             self.loc[i, :] = row[self.robot[i]], col[self.robot[i]]
             self.state[row[self.robot[i]], col[self.robot[i]]] += robot_marker
-            self.state_img[row[self.robot[i]]-1:row[self.robot[i]]+2,
-                col[self.robot[i]]-1:col[self.robot[i]]+2] = robot_marker*np.ones([3,3])
+            self.state_img[row[self.robot[i]]-1:row[self.robot[i]]+1,
+                col[self.robot[i]]-1:col[self.robot[i]]+1] = robot_marker
+
 
         self.init_state = self.state
         self.init_state_img = self.state_img
@@ -104,7 +105,7 @@ class Maze0122Env1(core.Env):
         self.state_img  *= 0 # np.zeros([mazeHeight,mazeWidth])
 
         for i in range(self.robot_num):
-            self.state_img[self.loc[i,0]-1:self.loc[i,0]+2, self.loc[i,1]-1:self.loc[i,1]+2] = robot_marker * np.ones([3, 3])
+            self.state_img[self.loc[i,0]-1:self.loc[i,0]+1, self.loc[i,1]-1:self.loc[i,1]+1] = robot_marker
 
         self.output_img = self.state_img + self.maze*255
 
@@ -113,96 +114,46 @@ class Maze0122Env1(core.Env):
         return(np.expand_dims(self.output_img,axis=2),reward,done,info)
 
     def get_reward(self):
-        cost_to_go = np.sum(costData[self.loc[:, 0], self.loc[:, 1]])
 
+        cost_to_go = np.sum(costData[self.loc[:, 0], self.loc[:, 1]])
         max_cost_agent = np.max(costData[self.loc[:, 0], self.loc[:, 1]])
 
         done = False
-        reward = -0.05
+        reward = 0.0
 
         if max_cost_agent <= self.goal_range:
             done = True
-            reward += 256
+            reward += 100
             return done, reward
         elif max_cost_agent <= 2 * self.goal_range and not self.reward_grad[0]:
             self.reward_grad[0] = 1
-            reward += 32
+            reward += 4
         elif max_cost_agent <= 4 * self.goal_range and not self.reward_grad[1]:
             self.reward_grad[1] = 1
-            reward += 32
-        elif max_cost_agent <= 6 * self.goal_range and not self.reward_grad[2]:
-            self.reward_grad[2] = 1
-            reward += 16
-        elif max_cost_agent <= 8 * self.goal_range and not self.reward_grad[3]:
-            self.reward_grad[3] = 1
-            reward += 16
-        elif max_cost_agent <= 10 * self.goal_range and not self.reward_grad[4]:
-            self.reward_grad[4] = 1
-            reward += 16
-        elif max_cost_agent <= 12 * self.goal_range and not self.reward_grad[5]:
-            self.reward_grad[5] = 1
-            reward += 8
-        elif max_cost_agent <= 14 * self.goal_range and not self.reward_grad[6]:
-            self.reward_grad[6] = 1
-            reward += 8
-        elif max_cost_agent <= 16 * self.goal_range and not self.reward_grad[7]:
-            self.reward_grad[7] = 1
-            reward += 8
-        elif max_cost_agent <= 18 * self.goal_range and not self.reward_grad[8]:
-            self.reward_grad[8] = 1
             reward += 4
-        elif max_cost_agent <= 20 * self.goal_range and not self.reward_grad[9]:
-          self.reward_grad[9] = 1
-          reward += 4
-        elif max_cost_agent <= 22 * self.goal_range and not self.reward_grad[10]:
-          self.reward_grad[10] = 1
-          reward += 4
-        elif max_cost_agent <= 24 * self.goal_range and not self.reward_grad[11]:
-          self.reward_grad[11] = 1
-          reward += 2
-        elif max_cost_agent <= 26 * self.goal_range and not self.reward_grad[12]:
-          self.reward_grad[12] = 1
-          reward += 2                    
-        elif max_cost_agent <= 28 * self.goal_range and not self.reward_grad[13]:
-          self.reward_grad[13] = 1
-          reward += 2   
+        elif max_cost_agent <= 8 * self.goal_range and not self.reward_grad[2]:
+            self.reward_grad[2] = 1
+            reward += 4
+        elif max_cost_agent <= 12 * self.goal_range and not self.reward_grad[3]:
+            self.reward_grad[2] = 1
+            reward += 4
 
         if cost_to_go <= self.goal_range * self.robot_num and not self.reward_grad[20]:
             self.reward_grad[20] = 1
-            reward += 8
+            reward += 2
         elif cost_to_go <= 2 * self.goal_range * self.robot_num and not self.reward_grad[21]:
             self.reward_grad[21] = 1
-            reward += 8
+            reward += 2
         elif cost_to_go <= 4 * self.goal_range * self.robot_num and not self.reward_grad[22]:
             self.reward_grad[22] = 1
-            reward += 8
+            reward += 2
         elif cost_to_go <= 8 * self.goal_range * self.robot_num and not self.reward_grad[23]:
             self.reward_grad[23] = 1
-            reward += 8
-        elif cost_to_go <= 10 * self.goal_range * self.robot_num and not self.reward_grad[24]:
+            reward += 2
+        elif cost_to_go <= 12 * self.goal_range * self.robot_num and not self.reward_grad[24]:
             self.reward_grad[24] = 1
-            reward += 4
-        elif cost_to_go <= 12 * self.goal_range * self.robot_num and not self.reward_grad[25]:
-            self.reward_grad[25] = 1
-            reward += 4
-        elif cost_to_go <= 14 * self.goal_range * self.robot_num and not self.reward_grad[26]:
-            self.reward_grad[26] = 1
-            reward += 4
-        elif cost_to_go <= 16 * self.goal_range * self.robot_num and not self.reward_grad[27]:
-            self.reward_grad[27] = 1
-            reward += 4
-        elif cost_to_go <= 18 * self.goal_range * self.robot_num and not self.reward_grad[28]:
-            self.reward_grad[28] = 1
             reward += 2
-        elif cost_to_go <= 21 * self.goal_range * self.robot_num and not self.reward_grad[29]:
-            self.reward_grad[29] = 1
-            reward += 2
-        elif cost_to_go <= 24 * self.goal_range * self.robot_num and not self.reward_grad[30]:
-            self.reward_grad[30] = 1
-            reward += 2
-        elif cost_to_go <= 28 * self.goal_range * self.robot_num and not self.reward_grad[31]:
-            self.reward_grad[31] = 1
-            reward += 2                                    
+
         return done, reward
 
     def render(self, mode = 'human'):
@@ -210,7 +161,7 @@ class Maze0122Env1(core.Env):
 
         render_image = np.copy(0*self.maze).astype(np.int16)
         for i in range(self.robot_num):
-            render_image[self.loc[i,0]-2:self.loc[i,0]+3, self.loc[i,1]-2:self.loc[i,1]+3] += robot_marker
+            render_image[self.loc[i,0]-1:self.loc[i,0]+1, self.loc[i,1]-1:self.loc[i,1]+1] += robot_marker
 
         row, col = np.nonzero(render_image)
         min_robots = 150.
@@ -223,9 +174,9 @@ class Maze0122Env1(core.Env):
             value = render_image[row[i],col[i]]
             ratio = 0.4 + 0.5 * max(value - min_robots, 0) / (max_robots - min_robots)
             ratio = min(0.9, max(0.4, ratio))
-            b = 255
-            g = 255 * (1 - ratio)
-            r = 255 * (1 - ratio)
+            b = 180
+            g = 180 * (1 - ratio)
+            r = 180 * (1 - ratio)
 
             for j, rgb in enumerate([r,g,b]):
                 rgb_render_image[row[i], col[i], j] = np.uint8(rgb)
@@ -325,6 +276,6 @@ def main(MazeEnv):
 
 
 if __name__ == '__main__':
-    main(Maze0122Env1)
+    main(Maze0318Env)
 
 
