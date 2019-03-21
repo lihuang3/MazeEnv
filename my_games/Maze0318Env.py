@@ -119,7 +119,7 @@ class Maze0318Env(core.Env):
         max_cost_agent = np.max(costData[self.loc[:, 0], self.loc[:, 1]])
 
         done = False
-        reward = 0.0
+        reward = -0.1
 
         if max_cost_agent <= self.goal_range:
             done = True
@@ -135,7 +135,7 @@ class Maze0318Env(core.Env):
             self.reward_grad[2] = 1
             reward += 4
         elif max_cost_agent <= 12 * self.goal_range and not self.reward_grad[3]:
-            self.reward_grad[2] = 1
+            self.reward_grad[3] = 1
             reward += 4
 
         if cost_to_go <= self.goal_range * self.robot_num and not self.reward_grad[20]:
