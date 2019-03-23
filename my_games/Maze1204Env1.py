@@ -65,7 +65,7 @@ class Maze1204Env1(core.Env):
       # ======================
         row, col = np.nonzero(freespace)
         self.reward_grad = np.zeros(40).astype(np.uint8)
-        self.robot_num = 256 #len(row)
+        self.robot_num = 400 #len(row)
         self.robot = random.sample(range(row.shape[0]), self.robot_num)
         self.state = np.zeros(np.shape(mazeData)).astype(int)
         self.state_img = np.copy(self.state)
@@ -170,7 +170,7 @@ class Maze1204Env1(core.Env):
 
         render_image = np.copy(0*self.maze).astype(np.int16)
         for i in range(self.robot_num):
-            render_image[self.loc[i,0]-2:self.loc[i,0]+3, self.loc[i,1]-2:self.loc[i,1]+3] += robot_marker
+            render_image[self.loc[i,0]-1:self.loc[i,0]+2, self.loc[i,1]-1:self.loc[i,1]+2] += robot_marker
 
         row, col = np.nonzero(render_image)
         min_robots = 150.
