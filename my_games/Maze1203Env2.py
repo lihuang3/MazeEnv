@@ -27,7 +27,6 @@ class Maze1203Env2(core.Env):
         robot_marker = 150
         self.goal_range = 20
         self.actions = [1, 2, 3, 4] # {up, down, left ,right}
-        self.action_dict = {0: (-1, 0), 1: (1, 0), 2: (-1, 1), 3: (1, 1)}  # {up, down, left ,right}
         self.action_map = {0: (-1, 0), 1: (1, 0), 2: (0,-1), 3: (0,1)}
         self.n_actions = len(self.actions)
         self.action_space = spaces.Discrete(self.n_actions)
@@ -56,12 +55,7 @@ class Maze1203Env2(core.Env):
     def _build_robot(self):
         row, col = np.nonzero(freespace)
         self.reward_grad = np.zeros(10).astype(np.uint8)
-        # try:
-        #     self.init_state
-        #     self.init_state_img
-        #     self.state = self.init_state
-        #     self.state_img = self.init_state_img
-        # except AttributeError:
+
         self.robot_num = 128 #len(row)
         self.robot = random.sample(range(row.shape[0]), self.robot_num)
         self.state = np.zeros(np.shape(mazeData)).astype(int)
@@ -137,59 +131,6 @@ class Maze1203Env2(core.Env):
           done = False
           self.reward_grad[8] = 1
           reward = 4
-
-        info = {}
-
-        return(np.expand_dims(self.output_img,axis=2),reward,done,info)
-
-
-
-
-    def _step(self,action):
-
-        next_direction, next_axis = self.action_dict[action]
-
-        next_state = np.roll(self.state, next_direction, axis=next_axis)
-
-        # Collision check
-        collision = np.logical_and(next_state, self.freespace)*next_state
-
-        next_state *= np.logical_xor(next_state, self.freespace)
-
-        # Move robots in the obstacle area back to previous grids and obtain the next state
-        ## Case 1: overlapping with population index
-        next_state += np.roll(collision, -next_direction, axis=next_axis)
-        ## Case 2: overlapping w/o population index (0: no robot; 1: robot(s) exits)
-        # next_state = np.logical_or(np.roll(collision, -next_direction, axis=next_axis), next_state).astype(int)
-
-        # next_state *= robot_marker   # Mark robot with intensity 150
-
-        row, col = np.nonzero(next_state)
-
-        self.state_img  *= 0 # np.zeros([mazeHeight,mazeWidth])
-
-        for i in range(row.shape[0]):
-            self.state_img[row[i]-2:row[i]+3, col[i]-2:col[i]+3] = robot_marker * np.ones([5, 5])
-
-        self.state = next_state
-
-        self.output_img = self.state_img + self.maze*255
-
-        state_cost_matrix = self.state * costData/ robot_marker
-        cost_to_go = np.sum(state_cost_matrix)
-
-        done = False
-        reward = -.1
-
-        if cost_to_go <= self.goal_range * self.robot_num:
-            done = True
-            reward = 100.0
-        elif cost_to_go <= 2*self.goal_range * self.robot_num and not self.reward_grad[0]:
-            self.reward_grad[0] = 1
-            reward = 20.0
-        elif cost_to_go <= 3*self.goal_range and not self.reward_grad[1]:
-            self.reward_grad[1] = 1
-            reward = 5.0
 
         info = {}
 
