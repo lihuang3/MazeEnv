@@ -11,7 +11,6 @@ from gym.envs.my_games.MazeEnvNOP10 import MazeEnvNOP10
 from gym.envs.my_games.MazeEnvAgg0 import MazeEnvAgg0
 from gym.envs.my_games.MazeEnvAgg1 import MazeEnvAgg1
 
-
 from gym.envs.my_games.MazeEnvRGB0 import MazeEnvRGB0
 
 from gym.envs.my_games.Maze1126Env import Maze1126Env
@@ -40,3 +39,6 @@ from gym.envs.my_games.Maze0318Env1 import Maze0318Env1
 
 from gym.envs.my_games.Maze0319Env import Maze0319Env
 from gym.envs.my_games.Maze0319Env1 import Maze0319Env1
+
+from gym.envs.my_games.Maze1204Env import Maze1204Env
+from gym.envs.my_games.Maze1204Env1 import Maze1204Env1
