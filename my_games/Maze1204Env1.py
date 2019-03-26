@@ -142,8 +142,11 @@ class Maze1204Env1(core.Env):
         elif max_cost_agent <= 12 * self.goal_range and not self.reward_grad[5]:
             self.reward_grad[5] = 1
             reward += 2
-        elif max_cost_agent <= 16 * self.goal_range and not self.reward_grad[6]:
+        elif max_cost_agent <= 14 * self.goal_range and not self.reward_grad[6]:
             self.reward_grad[6] = 1
+            reward += 2
+        elif max_cost_agent <= 16 * self.goal_range and not self.reward_grad[7]:
+            self.reward_grad[7] = 1
             reward += 2
 
         if cost_to_go <= self.goal_range * self.robot_num and not self.reward_grad[20]:
@@ -161,12 +164,18 @@ class Maze1204Env1(core.Env):
         elif cost_to_go <= 8 * self.goal_range * self.robot_num and not self.reward_grad[24]:
             self.reward_grad[24] = 1
             reward += 2
-        elif cost_to_go <= 12 * self.goal_range * self.robot_num and not self.reward_grad[25]:
+        elif cost_to_go <= 10 * self.goal_range * self.robot_num and not self.reward_grad[25]:
             self.reward_grad[25] = 1
             reward += 2
-        elif cost_to_go <= 16 * self.goal_range * self.robot_num and not self.reward_grad[26]:
+        elif cost_to_go <= 12 * self.goal_range * self.robot_num and not self.reward_grad[26]:
             self.reward_grad[26] = 1
-            reward += 2
+            reward += 1
+        elif cost_to_go <= 14 * self.goal_range * self.robot_num and not self.reward_grad[27]:
+            self.reward_grad[27] = 1
+            reward += 1
+        elif cost_to_go <= 16 * self.goal_range * self.robot_num and not self.reward_grad[28]:
+            self.reward_grad[28] = 1
+            reward += 1
 
                                  
         return done, reward
