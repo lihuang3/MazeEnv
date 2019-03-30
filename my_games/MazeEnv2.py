@@ -122,7 +122,7 @@ class MazeEnv2(MazeEnv):
         max_cost_agent = np.max(costData[self.state>0])
 
         done = False
-        reward = -1
+        reward = -.1
             
         if max_cost_agent<=self.goal_range:
             done = True
