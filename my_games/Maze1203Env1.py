@@ -1,5 +1,5 @@
 """
-  gym id: Maze1203Env-v0
+  gym id: Maze1203Env-v1
   Input: gray-scale images
   Reward: region range basis (easy)
   Render: gray-scale visualization
@@ -17,7 +17,7 @@ from time import sleep
 plt.ion()
 
 
-class Maze1203Env(core.Env):
+class Maze1203Env1(core.Env):
     def __init__(self):
         global mazeData, costData, freespace, mazeHeight, mazeWidth, robot_marker
         dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -41,7 +41,7 @@ class Maze1203Env(core.Env):
         self.maze = np.ones((mazeHeight, mazeWidth))-mazeData
         self.freespace = np.ones((mazeHeight, mazeWidth))-freespace
 
-        self.goal = np.array([130, 61])
+        self.goal = np.array([75, 100])
         self.init_state = []
         self.reset()
 
@@ -51,7 +51,7 @@ class Maze1203Env(core.Env):
 
 
     def _load_data(self, data_directory):
-        filename = 'map1203'
+        filename = 'map1203v2'
         mazeData = np.loadtxt(data_directory + '/'+filename+'.csv').astype(int)
         freespace = np.loadtxt(data_directory + '/'+filename+'_freespace.csv').astype(int)
         costData = np.loadtxt(data_directory + '/' +filename+ '_costmap.csv').astype(int)
@@ -127,19 +127,15 @@ class Maze1203Env(core.Env):
         elif max_cost_agent <= 4 * self.goal_range and not self.reward_grad[1]:
             self.reward_grad[1] = 1
             reward += 8
-        elif max_cost_agent <= 8 * self.goal_range and not self.reward_grad[2]:
+        elif max_cost_agent <= 6 * self.goal_range and not self.reward_grad[2]:
             self.reward_grad[2] = 1
             reward += 4
-        elif max_cost_agent <= 12 * self.goal_range and not self.reward_grad[3]:
+        elif max_cost_agent <= 8 * self.goal_range and not self.reward_grad[3]:
             self.reward_grad[3] = 1
             reward += 4
-        elif max_cost_agent <= 16 * self.goal_range and not self.reward_grad[4]:
+        elif max_cost_agent <= 10 * self.goal_range and not self.reward_grad[4]:
             self.reward_grad[4] = 1
             reward += 4
-        elif max_cost_agent <= 20 * self.goal_range and not self.reward_grad[5]:
-            self.reward_grad[5] = 1
-            reward += 4
-
 
         if cost_to_go <= self.goal_range * self.robot_num and not self.reward_grad[20]:
             self.reward_grad[20] = 1
@@ -150,17 +146,14 @@ class Maze1203Env(core.Env):
         elif cost_to_go <= 4 * self.goal_range * self.robot_num and not self.reward_grad[22]:
             self.reward_grad[22] = 1
             reward += 4
-        elif cost_to_go <= 8 * self.goal_range * self.robot_num and not self.reward_grad[23]:
+        elif cost_to_go <= 6 * self.goal_range * self.robot_num and not self.reward_grad[23]:
             self.reward_grad[23] = 1
             reward += 2
-        elif cost_to_go <= 12 * self.goal_range * self.robot_num and not self.reward_grad[24]:
+        elif cost_to_go <= 8 * self.goal_range * self.robot_num and not self.reward_grad[24]:
             self.reward_grad[24] = 1
             reward += 2
-        elif cost_to_go <= 16 * self.goal_range * self.robot_num and not self.reward_grad[25]:
+        elif cost_to_go <= 10 * self.goal_range * self.robot_num and not self.reward_grad[25]:
             self.reward_grad[25] = 1
-            reward += 2
-        elif cost_to_go <= 20 * self.goal_range * self.robot_num and not self.reward_grad[26]:
-            self.reward_grad[26] = 1
             reward += 2
 
         return done, reward
@@ -285,6 +278,6 @@ def main(MazeEnv):
 
 
 if __name__ == '__main__':
-    main(Maze1203Env)
+    main(Maze1203Env1)
 
 
