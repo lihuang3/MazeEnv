@@ -27,6 +27,19 @@ register(
 )
 
 register(
+    id='Maze1203Env-v1',
+    entry_point='gym.envs.my_games:Maze1203Env1',
+    max_episode_steps=2000,
+)
+
+register(
+    id='Maze1203Env-v0',
+    entry_point='gym.envs.my_games:Maze1203Env',
+    max_episode_steps=1500,
+)
+
+
+register(
     id='Maze0319Env-v0',
     entry_point='gym.envs.my_games:Maze0319Env',
     max_episode_steps=1000,
@@ -112,23 +125,6 @@ register(
     max_episode_steps=1500,
 )
 
-register(
-    id='Maze1203Env-v3',
-    entry_point='gym.envs.my_games:Maze1203Env3',
-    max_episode_steps=2000,
-)
-
-register(
-    id='Maze1203Env-v2',
-    entry_point='gym.envs.my_games:Maze1203Env2',
-    max_episode_steps=2000,
-)
-
-register(
-    id='Maze1203Env-v0',
-    entry_point='gym.envs.my_games:Maze1203Env',
-    max_episode_steps=1200,
-)
 
 register(
     id='Maze1126Env-v0',
