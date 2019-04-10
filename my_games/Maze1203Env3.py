@@ -163,7 +163,7 @@ class Maze1203Env3(core.Env):
 
         render_image = np.copy(0*self.maze).astype(np.int16)
         for i in range(self.robot_num):
-            render_image[self.loc[i,0]-1:self.loc[i,0]+1, self.loc[i,1]-1:self.loc[i,1]+1] += robot_marker
+            render_image[self.loc[i,0]-1:self.loc[i,0]+2, self.loc[i,1]-1:self.loc[i,1]+2] += robot_marker
 
         row, col = np.nonzero(render_image)
         min_robots = 150.
