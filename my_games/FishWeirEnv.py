@@ -147,7 +147,7 @@ class FishWeirEnv(core.Env):
           self.reward_grad[24] = 1
           reward = 2
 
-      return done, reward
+        return done, reward
 
     def render(self, mode = 'human'):
         # plt.gcf().clear()
