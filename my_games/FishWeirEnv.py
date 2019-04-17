@@ -15,8 +15,6 @@ from gym.utils import seeding
 from time import sleep
 plt.ion()
 
-
-
 class FishWeirEnv(core.Env):
     def __init__(self):
         global mazeData, costData, freespace, mazeHeight, mazeWidth, robot_marker
@@ -25,7 +23,7 @@ class FishWeirEnv(core.Env):
         self.map_data_dir = dir_path+'/MapData'
 
         robot_marker = 150
-        self.goal_range = 20
+        self.goal_range = 10
         self.actions = [1, 2, 3, 4] # {up, down, left ,right}
         self.action_dict = {0: (-1, 0), 1: (1, 0), 2: (-1, 1), 3: (1, 1)}  # {up, down, left ,right}
         self.action_map = {0: (-1, 0), 1: (1, 0), 2: (0,-1), 3: (0,1)}
@@ -37,8 +35,7 @@ class FishWeirEnv(core.Env):
         self.seed()
         self.maze = np.ones((mazeHeight, mazeWidth))-mazeData
         self.freespace = np.ones((mazeHeight, mazeWidth))-freespace
-        # self.goal = np.array([73, 10])
-        self.goal = np.array([81, 87])
+        self.goal = np.array([68, 72])
         self.init_state = []
         self.reset()
 
@@ -71,8 +68,8 @@ class FishWeirEnv(core.Env):
         for i in range(self.robot_num):
             self.loc[i, :] = row[self.robot[i]], col[self.robot[i]]
             self.state[row[self.robot[i]], col[self.robot[i]]] += robot_marker
-            self.state_img[row[self.robot[i]]-1:row[self.robot[i]]+2,
-                col[self.robot[i]]-1:col[self.robot[i]]+2] = robot_marker*np.ones([3,3])
+            self.state_img[row[self.robot[i]]-1:row[self.robot[i]]+1,
+                col[self.robot[i]]-1:col[self.robot[i]]+1] = robot_marker
 
         self.init_state = self.state
         self.init_state_img = self.state_img
@@ -82,6 +79,8 @@ class FishWeirEnv(core.Env):
         return (np.expand_dims(self.output_img, axis=2))
 
     def step(self, action):
+        info = {}
+
         dy, dx = self.action_map[action]
         prev_loc = np.copy(self.loc)
         self.loc = np.add(self.loc, np.array([dy, dx]))
@@ -91,12 +90,14 @@ class FishWeirEnv(core.Env):
         self.state_img  *= 0 # np.zeros([mazeHeight,mazeWidth])
 
         for i in range(self.robot_num):
-            self.state_img[self.loc[i,0]-1:self.loc[i,0]+2, self.loc[i,1]-1:self.loc[i,1]+2] = robot_marker * np.ones([3, 3])
+            self.state_img[self.loc[i,0]-1:self.loc[i,0]+1, self.loc[i,1]-1:self.loc[i,1]+1] = robot_marker
 
         self.output_img = self.state_img + self.maze*255
+        done, reward = self.get_reward()
+        return (np.expand_dims(self.output_img, axis=2), reward, done, info)
 
-        cost_to_go = np.sum (costData[self.loc[:,0],self.loc[:,1]])
-
+    def get_reward(self):
+        # cost_to_go = np.sum (costData[self.loc[:,0],self.loc[:,1]])
         max_cost_agent = np.max(costData[self.loc[:,0], self.loc[:,1]])
 
         done = False
@@ -104,88 +105,30 @@ class FishWeirEnv(core.Env):
 
         if max_cost_agent <= self.goal_range:
           done = True
-          reward = 128
+          reward = 100
         elif max_cost_agent <= 2 * self.goal_range and not self.reward_grad[0]:
           self.reward_grad[0] = 1
-          reward = 16
+          reward = 8
         elif max_cost_agent <= 4 * self.goal_range and not self.reward_grad[1]:
           self.reward_grad[1] = 1
-          reward = 8
+          reward = 4
         elif max_cost_agent <= 6 * self.goal_range and not self.reward_grad[2]:
           self.reward_grad[2] = 1
-          reward = 8
-
-        if cost_to_go <= self.goal_range * self.robot_num and not self.reward_grad[4]:
-          done = False
+          reward = 4
+        elif max_cost_agent <= 8 * self.goal_range and not self.reward_grad[3]:
+          self.reward_grad[3] = 1
+          reward = 4
+        elif max_cost_agent <= 10 * self.goal_range and not self.reward_grad[4]:
           self.reward_grad[4] = 1
-          reward = 8
-        elif cost_to_go <= 2 * self.goal_range * self.robot_num and not self.reward_grad[5]:
-          done = False
-          self.reward_grad[5] = 1
-          reward = 4
-        elif cost_to_go <= 4 * self.goal_range * self.robot_num and not self.reward_grad[6]:
-          done = False
-          self.reward_grad[6] = 1
-          reward = 4
-        elif cost_to_go <= 6 * self.goal_range * self.robot_num and not self.reward_grad[7]:
-          done = False
-          self.reward_grad[7] = 1
           reward = 2
-
+        elif max_cost_agent <= 12 * self.goal_range and not self.reward_grad[5]:
+          self.reward_grad[5] = 1
+          reward = 2
+        elif max_cost_agent <= 14 * self.goal_range and not self.reward_grad[6]:
+          self.reward_grad[6] = 1
+          reward = 2
         info = {}
-
-        return(np.expand_dims(self.output_img,axis=2),reward,done,info)
-
-
-    def _step(self,action):
-
-        next_direction, next_axis = self.action_dict[action]
-
-        next_state = np.roll(self.state, next_direction, axis=next_axis)
-
-        # Collision check
-        collision = np.logical_and(next_state, self.freespace)*next_state
-
-        next_state *= np.logical_xor(next_state, self.freespace)
-
-        # Move robots in the obstacle area back to previous grids and obtain the next state
-        ## Case 1: overlapping with population index
-        next_state += np.roll(collision, -next_direction, axis=next_axis)
-        ## Case 2: overlapping w/o population index (0: no robot; 1: robot(s) exits)
-        # next_state = np.logical_or(np.roll(collision, -next_direction, axis=next_axis), next_state).astype(int)
-
-        # next_state *= robot_marker   # Mark robot with intensity 150
-
-        row, col = np.nonzero(next_state)
-
-        self.state_img  *= 0 # np.zeros([mazeHeight,mazeWidth])
-
-        for i in range(row.shape[0]):
-            self.state_img[row[i]-2:row[i]+3, col[i]-2:col[i]+3] = robot_marker * np.ones([5, 5])
-
-        self.state = next_state
-
-        self.output_img = self.state_img + self.maze*255
-
-        state_cost_matrix = self.state * costData/ robot_marker
-        cost_to_go = np.sum(state_cost_matrix)
-
-        done = False
-        reward = -.1
-
-        if cost_to_go <= self.goal_range * self.robot_num:
-            done = True
-            reward = 100.0
-        elif cost_to_go <= 2*self.goal_range * self.robot_num and not self.reward_grad[0]:
-            self.reward_grad[0] = 1
-            reward = 20.0
-        elif cost_to_go <= 3*self.goal_range and not self.reward_grad[1]:
-            self.reward_grad[1] = 1
-            reward = 5.0
-
-        info = {}
-
-        return(np.expand_dims(self.output_img,axis=2),reward,done,info)
+        return done, reward
 
     def render(self, mode = 'human'):
         # plt.gcf().clear()
