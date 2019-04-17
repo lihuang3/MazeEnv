@@ -134,7 +134,7 @@ register(
 register(
     id='FishWeir-v0',
     entry_point='gym.envs.my_games:FishWeirEnv',
-    max_episode_steps=1500,
+    max_episode_steps=1000,
 )
 
 
