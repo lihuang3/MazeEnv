@@ -53,7 +53,7 @@ class FishWeirEnv(core.Env):
 
     def _build_robot(self):
         row, col = np.nonzero(freespace)
-        self.reward_grad = np.zeros(10).astype(np.uint8)
+        self.reward_grad = np.zeros(40).astype(np.uint8)
         # try:
         #     self.init_state
         #     self.init_state_img
@@ -97,7 +97,7 @@ class FishWeirEnv(core.Env):
         return (np.expand_dims(self.output_img, axis=2), reward, done, info)
 
     def get_reward(self):
-        # cost_to_go = np.sum (costData[self.loc[:,0],self.loc[:,1]])
+        cost_to_go = np.sum (costData[self.loc[:,0],self.loc[:,1]])
         max_cost_agent = np.max(costData[self.loc[:,0], self.loc[:,1]])
 
         done = False
@@ -127,8 +127,27 @@ class FishWeirEnv(core.Env):
         elif max_cost_agent <= 14 * self.goal_range and not self.reward_grad[6]:
           self.reward_grad[6] = 1
           reward = 2
-        info = {}
-        return done, reward
+
+
+        if cost_to_go <= self.goal_range:
+          reward = 4
+        elif cost_to_go <= 2 * self.goal_range and not self.reward_grad[20]:
+          self.reward_grad[20] = 1
+          reward = 4
+        elif cost_to_go <= 4 * self.goal_range and not self.reward_grad[21]:
+          self.reward_grad[21] = 1
+          reward = 4
+        elif cost_to_go <= 6 * self.goal_range and not self.reward_grad[22]:
+          self.reward_grad[22] = 1
+          reward = 2
+        elif cost_to_go <= 8 * self.goal_range and not self.reward_grad[23]:
+          self.reward_grad[23] = 1
+          reward = 2
+        elif cost_to_go <= 12 * self.goal_range and not self.reward_grad[24]:
+          self.reward_grad[24] = 1
+          reward = 2
+
+      return done, reward
 
     def render(self, mode = 'human'):
         # plt.gcf().clear()
