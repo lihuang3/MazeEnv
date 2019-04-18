@@ -111,7 +111,7 @@ class FishWeirEnv(core.Env):
           reward = 8
         elif max_cost_agent <= 4 * self.goal_range and not self.reward_grad[1]:
           self.reward_grad[1] = 1
-          reward = 4
+          reward = 8
         elif max_cost_agent <= 6 * self.goal_range and not self.reward_grad[2]:
           self.reward_grad[2] = 1
           reward = 4
@@ -120,7 +120,7 @@ class FishWeirEnv(core.Env):
           reward = 4
         elif max_cost_agent <= 10 * self.goal_range and not self.reward_grad[4]:
           self.reward_grad[4] = 1
-          reward = 2
+          reward = 4
         elif max_cost_agent <= 12 * self.goal_range and not self.reward_grad[5]:
           self.reward_grad[5] = 1
           reward = 2
@@ -130,21 +130,27 @@ class FishWeirEnv(core.Env):
 
 
         if cost_to_go <= self.goal_range:
-          reward = 4
+          reward = 8
         elif cost_to_go <= 2 * self.goal_range and not self.reward_grad[20]:
           self.reward_grad[20] = 1
-          reward = 4
+          reward = 8
         elif cost_to_go <= 4 * self.goal_range and not self.reward_grad[21]:
           self.reward_grad[21] = 1
           reward = 4
         elif cost_to_go <= 6 * self.goal_range and not self.reward_grad[22]:
           self.reward_grad[22] = 1
-          reward = 2
+          reward = 4
         elif cost_to_go <= 8 * self.goal_range and not self.reward_grad[23]:
           self.reward_grad[23] = 1
-          reward = 2
-        elif cost_to_go <= 12 * self.goal_range and not self.reward_grad[24]:
+          reward = 4
+        elif cost_to_go <= 10 * self.goal_range and not self.reward_grad[24]:
           self.reward_grad[24] = 1
+          reward = 2
+        elif cost_to_go <= 12 * self.goal_range and not self.reward_grad[25]:
+          self.reward_grad[25] = 1
+          reward = 2
+        elif cost_to_go <= 14 * self.goal_range and not self.reward_grad[26]:
+          self.reward_grad[26] = 1
           reward = 2
 
         return done, reward
