@@ -122,19 +122,19 @@ class MazeEnv(core.Env):
         elif cost_to_go <= 2*self.goal_range * self.robot_num and not self.reward_grad[20]:
             self.reward_grad[20] = 1
             reward = 4
-        elif cost_to_go <= 3*self.goal_range and not self.reward_grad[21]:
+        elif cost_to_go <= 3*self.goal_range * self.robot_num  and not self.reward_grad[21]:
             self.reward_grad[21] = 1
             reward = 4
-        elif cost_to_go <= 4*self.goal_range and not self.reward_grad[22]:
+        elif cost_to_go <= 4*self.goal_range * self.robot_num  and not self.reward_grad[22]:
             self.reward_grad[22] = 1
             reward = 4
-        elif cost_to_go <= 6*self.goal_range and not self.reward_grad[23]:
+        elif cost_to_go <= 6*self.goal_range * self.robot_num  and not self.reward_grad[23]:
             self.reward_grad[23] = 1
             reward = 2
-        elif cost_to_go <= 8*self.goal_range and not self.reward_grad[24]:
+        elif cost_to_go <= 8*self.goal_range * self.robot_num  and not self.reward_grad[24]:
             self.reward_grad[24] = 1
             reward = 2
-        elif cost_to_go <= 10*self.goal_range and not self.reward_grad[25]:
+        elif cost_to_go <= 10*self.goal_range * self.robot_num  and not self.reward_grad[25]:
             self.reward_grad[25] = 1
             reward = 2
 
