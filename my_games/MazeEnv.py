@@ -95,10 +95,10 @@ class MazeEnv(core.Env):
         done = False
         reward = -.1
 
-        if max_cost_agent <= self.goal_range * self.robot_num:
+        if max_cost_agent <= self.goal_range:
             done = True
             reward = 100.0
-        elif max_cost_agent <= 2*self.goal_range * self.robot_num and not self.reward_grad[0]:
+        elif max_cost_agent <= 2*self.goal_range and not self.reward_grad[0]:
             self.reward_grad[0] = 1
             reward = 4
         elif max_cost_agent <= 3*self.goal_range and not self.reward_grad[1]:
