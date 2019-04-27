@@ -64,8 +64,8 @@ class MazeEnv(core.Env):
         for i in range(self.robot_num):
             self.loc[i, :] = row[self.robot[i]], col[self.robot[i]]
             self.state[row[self.robot[i]], col[self.robot[i]]] += robot_marker
-            self.state_img[row[self.robot[i]]-1:row[self.robot[i]]+2,
-                col[self.robot[i]]-1:col[self.robot[i]]+2] = robot_marker
+            self.state_img[row[self.robot[i]]-1:row[self.robot[i]]+1,
+                col[self.robot[i]]-1:col[self.robot[i]]+1] = robot_marker
 
         self.init_state = self.state
         self.init_state_img = self.state_img
