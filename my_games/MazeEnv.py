@@ -23,7 +23,7 @@ class MazeEnv(core.Env):
 
         self.map_data_dir = dir_path+'/MapData'
         robot_marker = 150
-        self.goal_range = 10
+        self.goal_range = 15
         self.actions = [1, 2, 3, 4] # {up, down, left ,right}
         self.action_map = {0: (-1, 0), 1: (1, 0), 2: (-1, 1), 3: (1, 1)}  # {up, down, left ,right}
         self.n_actions = len(self.actions)
@@ -88,7 +88,7 @@ class MazeEnv(core.Env):
         done, reward = self.get_reward()
         return(np.expand_dims(self.output_img,axis=2),reward,done,info)
 
-    def get_reward(self):
+    def get_reward1(self):
         cost_to_go = np.sum(costData[self.loc[:, 0], self.loc[:, 1]])
         max_cost_agent = np.max(costData[self.loc[:, 0], self.loc[:, 1]])
 
@@ -139,6 +139,42 @@ class MazeEnv(core.Env):
             reward = 2
 
         return done, reward
+
+    def get_reward(self):
+        cost_to_go = np.sum(costData[self.loc[:, 0], self.loc[:, 1]])
+        max_cost_agent = np.max(costData[self.loc[:, 0], self.loc[:, 1]])
+
+        done = False
+        reward = -.1
+
+        if cost_to_go <= self.goal_range * self.robot_num:
+            reward = 100
+            done = True
+        elif cost_to_go <= 2*self.goal_range * self.robot_num and not self.reward_grad[20]:
+            self.reward_grad[20] = 1
+            reward = 8
+        elif cost_to_go <= 3*self.goal_range * self.robot_num  and not self.reward_grad[21]:
+            self.reward_grad[21] = 1
+            reward = 8
+        elif cost_to_go <= 4*self.goal_range * self.robot_num  and not self.reward_grad[22]:
+            self.reward_grad[22] = 1
+            reward = 4
+        elif cost_to_go <= 5*self.goal_range * self.robot_num  and not self.reward_grad[23]:
+            self.reward_grad[23] = 1
+            reward = 4
+        elif cost_to_go <= 6*self.goal_range * self.robot_num  and not self.reward_grad[24]:
+            self.reward_grad[24] = 1
+            reward = 4
+        elif cost_to_go <= 7*self.goal_range * self.robot_num  and not self.reward_grad[25]:
+            self.reward_grad[25] = 1
+            reward = 2
+        elif cost_to_go <= 8*self.goal_range * self.robot_num  and not self.reward_grad[26]:
+            self.reward_grad[26] = 1
+            reward = 2
+
+
+        return done, reward
+
 
     def render(self, mode = 'human'):
         # plt.imshow(self.state_img + self.maze*255, vmin=0, vmax=255)
