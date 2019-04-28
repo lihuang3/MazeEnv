@@ -25,7 +25,7 @@ class MazeEnv2(core.Env):
         robot_marker = 150
         self.goal_range = 10
         self.actions = [1, 2, 3, 4] # {up, down, left ,right}
-        self.action_map = {0: (-1, 0), 1: (1, 0), 2: (-1, 1), 3: (1, 1)}  # {up, down, left ,right}
+        self.action_map = {0: (-1, 0), 1: (1, 0), 2: (0, 1), 3: (0, -1)}  # {up, down, left ,right}
         self.n_actions = len(self.actions)
         self.action_space = spaces.Discrete(self.n_actions)
         mazeData, costData, freespace = self._load_data(self.map_data_dir)

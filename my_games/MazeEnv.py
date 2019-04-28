@@ -25,7 +25,7 @@ class MazeEnv(core.Env):
         robot_marker = 150
         self.goal_range = 15
         self.actions = [1, 2, 3, 4] # {up, down, left ,right}
-        self.action_map = {0: (-1, 0), 1: (1, 0), 2: (-1, 1), 3: (1, 1)}  # {up, down, left ,right}
+        self.action_map = {0: (-1, 0), 1: (1, 0), 2: (0, -1), 3: (0, 1)}  # {up, down, left ,right}
         self.n_actions = len(self.actions)
         self.action_space = spaces.Discrete(self.n_actions)
         mazeData, costData, freespace = self._load_data(self.map_data_dir)
@@ -64,8 +64,8 @@ class MazeEnv(core.Env):
         for i in range(self.robot_num):
             self.loc[i, :] = row[self.robot[i]], col[self.robot[i]]
             self.state[row[self.robot[i]], col[self.robot[i]]] += robot_marker
-            self.state_img[row[self.robot[i]]-1:row[self.robot[i]]+1,
-                col[self.robot[i]]-1:col[self.robot[i]]+1] = robot_marker
+            self.state_img[row[self.robot[i]]-1:row[self.robot[i]]+2,
+                col[self.robot[i]]-1:col[self.robot[i]]+2] = robot_marker
 
         self.init_state = self.state
         self.init_state_img = self.state_img
@@ -83,12 +83,12 @@ class MazeEnv(core.Env):
         self.loc[collision, :] = prev_loc[collision, :]
         self.state_img  *= 0 # np.zeros([mazeHeight,mazeWidth])
         for i in range(self.robot_num):
-            self.state_img[self.loc[i,0]-1:self.loc[i,0]+1, self.loc[i,1]-1:self.loc[i,1]+1] = robot_marker
+            self.state_img[self.loc[i,0]-1:self.loc[i,0]+2, self.loc[i,1]-1:self.loc[i,1]+2] = robot_marker
         self.output_img = self.state_img + self.maze*255
         done, reward = self.get_reward()
         return(np.expand_dims(self.output_img,axis=2),reward,done,info)
 
-    def get_reward1(self):
+    def get_reward(self):
         cost_to_go = np.sum(costData[self.loc[:, 0], self.loc[:, 1]])
         max_cost_agent = np.max(costData[self.loc[:, 0], self.loc[:, 1]])
 
@@ -100,25 +100,23 @@ class MazeEnv(core.Env):
             reward = 100.0
         elif max_cost_agent <= 2*self.goal_range and not self.reward_grad[0]:
             self.reward_grad[0] = 1
-            reward = 4
+            reward = 8
         elif max_cost_agent <= 3*self.goal_range and not self.reward_grad[1]:
             self.reward_grad[1] = 1
             reward = 4
         elif max_cost_agent <= 4*self.goal_range and not self.reward_grad[2]:
             self.reward_grad[2] = 1
             reward = 4
-        elif max_cost_agent <= 6*self.goal_range and not self.reward_grad[3]:
+        elif max_cost_agent <= 5*self.goal_range and not self.reward_grad[3]:
             self.reward_grad[3] = 1
             reward = 2
-        elif max_cost_agent <= 8*self.goal_range and not self.reward_grad[4]:
+        elif max_cost_agent <= 6*self.goal_range and not self.reward_grad[4]:
             self.reward_grad[4] = 1
             reward = 2
-        elif max_cost_agent <= 10*self.goal_range and not self.reward_grad[5]:
-            self.reward_grad[5] = 1
-            reward = 2      
+
 
         if cost_to_go <= self.goal_range * self.robot_num:
-            reward = 8
+            reward = 4
         elif cost_to_go <= 2*self.goal_range * self.robot_num and not self.reward_grad[20]:
             self.reward_grad[20] = 1
             reward = 4
@@ -127,20 +125,15 @@ class MazeEnv(core.Env):
             reward = 4
         elif cost_to_go <= 4*self.goal_range * self.robot_num  and not self.reward_grad[22]:
             self.reward_grad[22] = 1
-            reward = 4
+            reward = 2
         elif cost_to_go <= 6*self.goal_range * self.robot_num  and not self.reward_grad[23]:
             self.reward_grad[23] = 1
             reward = 2
-        elif cost_to_go <= 8*self.goal_range * self.robot_num  and not self.reward_grad[24]:
-            self.reward_grad[24] = 1
-            reward = 2
-        elif cost_to_go <= 10*self.goal_range * self.robot_num  and not self.reward_grad[25]:
-            self.reward_grad[25] = 1
-            reward = 2
+
 
         return done, reward
 
-    def get_reward(self):
+    def get_reward1(self):
         cost_to_go = np.sum(costData[self.loc[:, 0], self.loc[:, 1]])
         max_cost_agent = np.max(costData[self.loc[:, 0], self.loc[:, 1]])
 
