@@ -14,7 +14,8 @@ from gym.utils import seeding
 
 from time import sleep
 plt.ion()
-
+from scipy.stats import gaussian_kde
+ROOT_DIR = os.path.abspath("./")
 
 class MazeEnv(core.Env):
     def __init__(self):
@@ -22,6 +23,14 @@ class MazeEnv(core.Env):
         dir_path = os.path.dirname(os.path.realpath(__file__))
 
         self.map_data_dir = dir_path+'/MapData'
+        self.save_costlog = False
+        self.avgcost = np.empty((0))
+        self.maxcost = np.empty((0))
+
+        self.save_frame = False
+        self.loc_hist = [[],[],[],[]]
+        self.internal_steps = 0
+
         robot_marker = 150
         self.goal_range = 15
         self.actions = [1, 2, 3, 4] # {up, down, left ,right}
@@ -46,17 +55,31 @@ class MazeEnv(core.Env):
 
     def _load_data(self, data_directory):
         filename = 'scaled_maze7'
-
+        RGBmap = 'map1'
+        self.raw_img = plt.imread(data_directory + '/'+RGBmap+'.png')
         mazeData = np.loadtxt(data_directory + '/'+filename+'.csv').astype(int)
         freespace = np.loadtxt(data_directory + '/'+filename+'_freespace.csv').astype(int)
         costData = np.loadtxt(data_directory + '/' +filename+ '_costmap.csv').astype(int)
         return mazeData, costData, freespace
 
     def _build_robot(self):
+        self.internal_steps = 0
+
+        if self.save_costlog:
+            eplen = np.shape(self.avgcost)[0]
+            if eplen > 100 and eplen < 500 :
+                os.makedirs( os.path.join(ROOT_DIR, 'data'), exist_ok=True)
+                filename = 'costplot.txt'
+                output = np.append(self.avgcost, self.maxcost)
+                np.savetxt(os.path.join(ROOT_DIR,'data', filename), output, fmt= '%.1f')
+                exit()
+
+        self.avgcost = np.empty((0))
+        self.maxcost = np.empty((0)) 
 
         row, col = np.nonzero(freespace)
         self.reward_grad = np.zeros(40).astype(np.uint8)
-        self.robot_num = 64 #len(row)
+        self.robot_num = 128 #len(row)
         self.robot = random.sample(range(row.shape[0]), self.robot_num)
         self.state = np.zeros(np.shape(mazeData)).astype(int)
         self.state_img = np.copy(self.state)
@@ -76,6 +99,12 @@ class MazeEnv(core.Env):
     def step(self,action):
         info = {}
 
+        self.action = action
+        # For sticky action rendering usage
+        self.loc_hist[self.internal_steps] = self.loc
+        self.internal_steps += 1
+        self.internal_steps %= 4
+
         dy, dx = self.action_map[action]
         prev_loc = np.copy(self.loc)
         self.loc = np.add(self.loc, np.array([dy, dx]))
@@ -91,7 +120,8 @@ class MazeEnv(core.Env):
     def get_reward(self):
         cost_to_go = np.sum(costData[self.loc[:, 0], self.loc[:, 1]])
         max_cost_agent = np.max(costData[self.loc[:, 0], self.loc[:, 1]])
-
+        self.avgcost = np.append(self.avgcost, cost_to_go/float(self.robot_num))
+        self.maxcost = np.append(self.maxcost, max_cost_agent)
         done = False
         reward = -.1
 
@@ -114,20 +144,20 @@ class MazeEnv(core.Env):
             self.reward_grad[4] = 1
             reward = 2
 
-
-        if cost_to_go <= self.goal_range * self.robot_num:
-            reward = 4
-        elif cost_to_go <= 2*self.goal_range * self.robot_num and not self.reward_grad[20]:
+        if cost_to_go <= self.goal_range * self.robot_num and not self.reward_grad[20]:
             self.reward_grad[20] = 1
             reward = 4
-        elif cost_to_go <= 3*self.goal_range * self.robot_num  and not self.reward_grad[21]:
+        elif cost_to_go <= 2*self.goal_range * self.robot_num and not self.reward_grad[21]:
             self.reward_grad[21] = 1
             reward = 4
-        elif cost_to_go <= 4*self.goal_range * self.robot_num  and not self.reward_grad[22]:
+        elif cost_to_go <= 3*self.goal_range * self.robot_num  and not self.reward_grad[22]:
             self.reward_grad[22] = 1
-            reward = 2
-        elif cost_to_go <= 6*self.goal_range * self.robot_num  and not self.reward_grad[23]:
+            reward = 4
+        elif cost_to_go <= 4*self.goal_range * self.robot_num  and not self.reward_grad[23]:
             self.reward_grad[23] = 1
+            reward = 2
+        elif cost_to_go <= 6*self.goal_range * self.robot_num  and not self.reward_grad[24]:
+            self.reward_grad[24] = 1
             reward = 2
 
 
@@ -168,14 +198,62 @@ class MazeEnv(core.Env):
 
         return done, reward
 
+    def render_config(self, loc, dot_size=20):
+        # Load high-resolution
+        plt.imshow(self.raw_img)
+        h, w, _ = self.raw_img.shape
+        h1, w1 = self.maze.shape
+        # Draw goal range
+        circle = plt.Circle((float(w)/w1*self.goal[1], float(h)/h1*self.goal[0]), 45, color='red', linewidth=3, fill=False)
+        plt.gcf().gca().add_artist(circle)
+        # Configure robot density
+        ys, xs =float(h)/h1*loc[:,0], float(w)/w1*loc[:,1]
+        xy = np.vstack([xs, ys])
+        z = gaussian_kde(xy)(xy)
+        idx = z.argsort()
+        xs, ys, z = xs[idx], ys[idx], z[idx]
+        cmap = mpl.cm.get_cmap('Blues')
+        upperZ = max(z)
+        lowerZ = min(z)
+        norm = mpl.colors.Normalize(vmin = lowerZ, vmax=upperZ)
+        z[z<0.7*upperZ] = 0.7*upperZ
+        colors = [cmap(norm(value)) for value in z]
+        # Draw robots
+        plt.scatter(xs, ys, c=colors, s=dot_size, edgecolor='')
 
-    def render(self, mode = 'human'):
+
+    def _render(self, mode = 'human'):
         # plt.imshow(self.state_img + self.maze*255, vmin=0, vmax=255)
         plt.imshow(self.output_img)
         plt.show(False)
         plt.pause(0.0001)
         plt.gcf().clear()
 
+    def render(self, mode = 'human'):
+        idx = self.internal_steps - 5
+        for i in range(4):
+            idx = (idx + 1) % 4
+            loc = self.loc_hist[i]
+            plt.gcf().clear()
+
+            self.render_config(loc, dot_size=40)
+            if self.save_frame:
+                fig = plt.gcf()
+                fig.set_size_inches(3, 3)
+                filename = ROOT_DIR + '/frames/' + 'fig' + '%05d' % (1 + len(os.listdir(ROOT_DIR + '/frames'))) + '.png'
+                plt.axis('off')
+                fig.tight_layout()
+                fig.subplots_adjust\
+                        (top=1.0,
+                        bottom=0.0,
+                        left=0.0,
+                        right=1.0,
+                        hspace=0.0,
+                        wspace=0.0)
+                plt.savefig(filename, pad_inches=0.0, dpi=100)
+            else:
+                plt.show(False)
+                plt.pause(0.0001)
 
     def reset(self):
         return self._build_robot()
