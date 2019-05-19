@@ -80,6 +80,9 @@ class Maze1203Env3(core.Env):
         self.output_img = self.state_img + self.maze * 255
         return (np.expand_dims(self.output_img, axis=2))
 
+    def get_costmap(self):
+        return (np.expand_dims(costData, axis=2))
+        
     def step(self, action):
 
         info = {}

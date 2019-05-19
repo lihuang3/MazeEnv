@@ -96,6 +96,9 @@ class MazeEnv(core.Env):
 
         return (np.expand_dims(self.output_img, axis=2))
 
+    def get_costmap(self):
+        return (np.expand_dims(costData, axis=2))
+        
     def step(self,action):
         info = {}
 
