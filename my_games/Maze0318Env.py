@@ -86,6 +86,7 @@ class Maze0318Env(core.Env):
 
     def get_costmap(self):
         return (np.expand_dims(costData, axis=2))
+
         
     def step(self, action):
 
