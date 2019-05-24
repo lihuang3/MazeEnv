@@ -18,35 +18,33 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/my_games/MLB2Map.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="361">
-                  <caret line="20" column="17" selection-start-line="20" selection-end-line="21" />
+                <state relative-caret-position="247">
+                  <caret line="13" lean-forward="true" selection-start-line="13" selection-end-line="13" />
+                  <folding>
+                    <element signature="e#0#22#0" expanded="true" />
+                  </folding>
                 </state>
               </provider>
             </entry>
           </file>
           <file pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/my_games/FishWeirEnv.py">
+            <entry file="file://$PROJECT_DIR$/my_games/Maze0518Env.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="111">
-                  <caret line="55" column="20" selection-start-line="55" selection-start-column="20" selection-end-line="55" selection-end-column="20" />
+                <state relative-caret-position="-843">
+                  <caret line="126" column="23" selection-start-line="126" selection-start-column="23" selection-end-line="126" selection-end-column="23" />
+                  <folding>
+                    <element signature="e#6723#7926#0" />
+                    <element signature="e#9025#9836#0" />
+                  </folding>
                 </state>
               </provider>
             </entry>
           </file>
           <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/__init__.py">
+            <entry file="file://$PROJECT_DIR$/my_games/Maze0318Env1.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="247">
-                  <caret line="13" column="23" selection-start-line="13" selection-start-column="23" selection-end-line="13" selection-end-column="23" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/my_games/Maze0122Env1.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="3781">
-                  <caret line="199" column="13" selection-start-line="199" selection-start-column="13" selection-end-line="199" selection-end-column="13" />
+                <state relative-caret-position="-931">
+                  <caret line="41" column="19" lean-forward="true" selection-start-line="41" selection-start-column="19" selection-end-line="41" selection-end-column="19" />
                 </state>
               </provider>
             </entry>
@@ -60,11 +58,6 @@
               <provider selected="true" editor-type-id="text-editor">
                 <state relative-caret-position="209">
                   <caret line="68" column="41" selection-start-line="68" selection-start-column="41" selection-end-line="68" selection-end-column="41" />
-                  <folding>
-                    <element signature="e#7230#7363#0" />
-                    <element signature="e#7400#8117#0" />
-                    <element signature="e#8160#8948#0" />
-                  </folding>
                 </state>
               </provider>
             </entry>
@@ -87,6 +80,9 @@
       <find>action_space</find>
       <find>render</find>
       <find>savefi</find>
+      <find>collis</find>
+      <find>self.freespace</find>
+      <find>cope</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -111,17 +107,19 @@
         <option value="$PROJECT_DIR$/my_games/Maze1202Env1.py" />
         <option value="$PROJECT_DIR$/my_games/__init__.py" />
         <option value="$PROJECT_DIR$/__init__.py" />
-        <option value="$PROJECT_DIR$/my_games/MLB2Map.py" />
         <option value="$PROJECT_DIR$/my_games/Maze0318Env.py" />
         <option value="$PROJECT_DIR$/my_games/FishWeirEnv.py" />
+        <option value="$PROJECT_DIR$/my_games/MLB2Map.py" />
+        <option value="$PROJECT_DIR$/my_games/Maze1203Env4.py" />
+        <option value="$PROJECT_DIR$/my_games/Maze0518Env.py" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="7">
-    <option name="x" value="-489" />
-    <option name="y" value="-9" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="1783" />
+    <option name="y" value="48" />
     <option name="width" value="1860" />
-    <option name="height" value="1098" />
+    <option name="height" value="1093" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -129,7 +127,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -146,6 +143,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -164,7 +162,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.MLB2Map">
+  <component name="RunManager" selected="Python.Maze0518Env">
     <configuration name="MLB2Map" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="MazeEnv" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -186,19 +184,19 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="Maze0318Env1" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="Maze0518Env" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="MazeEnv" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="" />
+      <option name="SDK_HOME" value="C:\ProgramData\Anaconda3\envs\py37\python.exe" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/my_games" />
-      <option name="IS_MODULE_SDK" value="true" />
+      <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/my_games/Maze0318Env1.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/my_games/Maze0518Env.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -228,19 +226,19 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="Maze1204Env" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="Maze1203Env4" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="MazeEnv" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="" />
+      <option name="SDK_HOME" value="C:\ProgramData\Anaconda3\envs\py37\python.exe" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/my_games" />
-      <option name="IS_MODULE_SDK" value="true" />
+      <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/my_games/Maze1204Env.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/my_games/Maze1203Env4.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -272,18 +270,18 @@
     </configuration>
     <list>
       <item itemvalue="Python.MLB2Map" />
-      <item itemvalue="Python.Maze0318Env1" />
       <item itemvalue="Python.Maze1202Env" />
       <item itemvalue="Python.Maze1204Env1" />
-      <item itemvalue="Python.Maze1204Env" />
+      <item itemvalue="Python.Maze1203Env4" />
+      <item itemvalue="Python.Maze0518Env" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.Maze0518Env" />
+        <item itemvalue="Python.Maze1203Env4" />
         <item itemvalue="Python.MLB2Map" />
         <item itemvalue="Python.Maze1202Env" />
         <item itemvalue="Python.Maze1204Env1" />
-        <item itemvalue="Python.Maze1204Env" />
-        <item itemvalue="Python.Maze0318Env1" />
       </list>
     </recent_temporary>
   </component>
@@ -301,16 +299,16 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="-7" width="1488" height="878" extended-state="7" />
+    <frame x="1913" y="-7" width="1488" height="878" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.13292012" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.20523416" />
       <window_info id="Structure" order="1" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.10931677" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.31871346" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.28647926" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.31860778" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -323,6 +321,66 @@
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="Data View" order="3" weight="0.6114687" />
     </layout>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/my_games/MLB2Map.py</url>
+          <line>21</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="debuggerHistoryManager">
+    <expressions id="evaluateExpression">
+      <expression>
+        <expression-string>self.loc.shape[0]</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>self.loc.shape</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>self.loc</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>np.delete(self.loc, collision[0][escaped], axis=0)</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>np.delete(self.loc, collision[0][escaped])</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>collision[0][escaped]</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>collision[0, int(escaped)]</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>collision[0, escaped]</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>collision</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+    </expressions>
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$USER_HOME$/gym_/gym/envs/my_games/__init__.py" />
@@ -365,18 +423,6 @@
         <state relative-caret-position="-378">
           <folding>
             <element signature="e#0#11#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/my_games/Maze0318Env1.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="468">
-          <caret line="53" column="29" selection-start-line="53" selection-start-column="29" selection-end-line="53" selection-end-column="29" />
-          <folding>
-            <marker date="1553617339398" expanded="false" signature="7679:7821" ph="..." />
-            <marker date="1553617339398" expanded="false" signature="7848:8575" ph="..." />
-            <marker date="1553617339398" expanded="false" signature="8608:9406" ph="..." />
           </folding>
         </state>
       </provider>
@@ -504,9 +550,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/my_games/MapData/fish_weir.png">
-      <provider selected="true" editor-type-id="images" />
-    </entry>
+    <entry file="file://$PROJECT_DIR$/my_games/MapData/fish_weir.png" />
     <entry file="file://C:/ProgramData/Anaconda3/envs/py37/Lib/site-packages/numpy/lib/_datasource.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="147">
@@ -524,10 +568,10 @@
         <state relative-caret-position="-1363" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/my_games/MLB2Map.py">
+    <entry file="file://$PROJECT_DIR$/my_games/FishWeirEnv.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="361">
-          <caret line="20" column="17" selection-start-line="20" selection-end-line="21" />
+        <state relative-caret-position="533">
+          <caret line="263" column="103" selection-start-line="263" selection-start-column="103" selection-end-line="263" selection-end-column="103" />
         </state>
       </provider>
     </entry>
@@ -545,21 +589,58 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/my_games/FishWeirEnv.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="111">
-          <caret line="55" column="20" selection-start-line="55" selection-start-column="20" selection-end-line="55" selection-end-column="20" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/my_games/Maze0318Env.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="209">
           <caret line="68" column="41" selection-start-line="68" selection-start-column="41" selection-end-line="68" selection-end-column="41" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/my_games/Maze1203Env4.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="361">
+          <caret line="19" lean-forward="true" selection-start-line="19" selection-end-line="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/my_games/Maze1203Env2.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-323">
+          <caret line="3" column="31" selection-start-line="3" selection-start-column="31" selection-end-line="3" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/my_games/MLB2Map.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="247">
+          <caret line="13" lean-forward="true" selection-start-line="13" selection-end-line="13" />
           <folding>
-            <element signature="e#7230#7363#0" />
-            <element signature="e#7400#8117#0" />
-            <element signature="e#8160#8948#0" />
+            <element signature="e#0#22#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/my_games/Maze0318Env1.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-931">
+          <caret line="41" column="19" lean-forward="true" selection-start-line="41" selection-start-column="19" selection-end-line="41" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/_pydev_imps/_pydev_execfile.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="323">
+          <caret line="17" selection-start-line="17" selection-end-line="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/my_games/Maze0518Env.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-843">
+          <caret line="126" column="23" selection-start-line="126" selection-start-column="23" selection-end-line="126" selection-end-column="23" />
+          <folding>
+            <element signature="e#6723#7926#0" />
+            <element signature="e#9025#9836#0" />
           </folding>
         </state>
       </provider>

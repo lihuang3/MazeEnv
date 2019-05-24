@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 
 ROOT_PATH = os.path.abspath('./MapData')
 
-mapfile = 'fish'
-filename = 'fishweir'
+mapfile = 'map0519'
+filename = 'map0519v1'
 action_space = 4
 # Load hand-craft binary maze
 mazeData = np.loadtxt(os.path.join(ROOT_PATH, mapfile+'.txt')).astype(int)
@@ -16,9 +16,10 @@ np.savetxt('{}/{}_freespace.csv'.format(ROOT_PATH, filename), mazeData, fmt= '%3
 # Object: assign cost-to-go to elements of the centerline
 # Method: breadth-first search
 BSF_Frontier = []
-
+plt.imshow(mazeData)
+plt.show()
 # Set goal location
-goal = np.array([68, 72])
+goal = np.array([67, 92])
 
 # Initialize centerline cost-to-go map
 costMap = np.copy(mazeData)
