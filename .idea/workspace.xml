@@ -28,14 +28,32 @@
             </entry>
           </file>
           <file pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/__init__.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="152">
+                  <caret line="8" column="1" lean-forward="true" selection-start-line="8" selection-start-column="1" selection-end-line="8" selection-end-column="1" />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/my_games/Maze0518Env.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="-843">
+                <state relative-caret-position="2394">
                   <caret line="126" column="23" selection-start-line="126" selection-start-column="23" selection-end-line="126" selection-end-column="23" />
                   <folding>
                     <element signature="e#6723#7926#0" />
                     <element signature="e#9025#9836#0" />
                   </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/my_games/__init__.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="409">
+                  <caret line="50" column="34" selection-start-line="50" selection-start-column="34" selection-end-line="50" selection-end-column="34" />
                 </state>
               </provider>
             </entry>
@@ -105,13 +123,13 @@
         <option value="$PROJECT_DIR$/my_games/Maze1204Env.py" />
         <option value="$PROJECT_DIR$/my_games/Maze1202Env.py" />
         <option value="$PROJECT_DIR$/my_games/Maze1202Env1.py" />
-        <option value="$PROJECT_DIR$/my_games/__init__.py" />
-        <option value="$PROJECT_DIR$/__init__.py" />
         <option value="$PROJECT_DIR$/my_games/Maze0318Env.py" />
         <option value="$PROJECT_DIR$/my_games/FishWeirEnv.py" />
         <option value="$PROJECT_DIR$/my_games/MLB2Map.py" />
         <option value="$PROJECT_DIR$/my_games/Maze1203Env4.py" />
         <option value="$PROJECT_DIR$/my_games/Maze0518Env.py" />
+        <option value="$PROJECT_DIR$/my_games/__init__.py" />
+        <option value="$PROJECT_DIR$/__init__.py" />
       </list>
     </option>
   </component>
@@ -133,11 +151,6 @@
             <path>
               <item name="MazeEnv" type="b2602c69:ProjectViewProjectNode" />
               <item name="MazeEnv" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="MazeEnv" type="b2602c69:ProjectViewProjectNode" />
-              <item name="MazeEnv" type="462c0819:PsiDirectoryNode" />
-              <item name="my_games" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -302,12 +315,12 @@
     <frame x="1913" y="-7" width="1488" height="878" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.20523416" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.20523416" />
       <window_info id="Structure" order="1" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.28647926" />
+      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.28647926" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.31860778" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -542,14 +555,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/my_games/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="508">
-          <caret line="46" column="51" selection-start-line="46" selection-start-column="51" selection-end-line="46" selection-end-column="51" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/my_games/MapData/fish_weir.png" />
     <entry file="file://C:/ProgramData/Anaconda3/envs/py37/Lib/site-packages/numpy/lib/_datasource.py">
       <provider selected="true" editor-type-id="text-editor">
@@ -572,13 +577,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="533">
           <caret line="263" column="103" selection-start-line="263" selection-start-column="103" selection-end-line="263" selection-end-column="103" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="247">
-          <caret line="13" column="23" selection-start-line="13" selection-start-column="23" selection-end-line="13" selection-end-column="23" />
         </state>
       </provider>
     </entry>
@@ -636,12 +634,26 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/my_games/Maze0518Env.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-843">
+        <state relative-caret-position="2394">
           <caret line="126" column="23" selection-start-line="126" selection-start-column="23" selection-end-line="126" selection-end-column="23" />
           <folding>
             <element signature="e#6723#7926#0" />
             <element signature="e#9025#9836#0" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/my_games/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="409">
+          <caret line="50" column="34" selection-start-line="50" selection-start-column="34" selection-end-line="50" selection-end-column="34" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="152">
+          <caret line="8" column="1" lean-forward="true" selection-start-line="8" selection-start-column="1" selection-end-line="8" selection-end-column="1" />
         </state>
       </provider>
     </entry>
