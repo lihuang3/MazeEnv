@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 ROOT_PATH = os.path.abspath('./MapData')
 
 mapfile = 'map0519'
-filename = 'map0519v1'
+filename = 'map0519'
 action_space = 4
 # Load hand-craft binary maze
 mazeData = np.loadtxt(os.path.join(ROOT_PATH, mapfile+'.txt')).astype(int)
@@ -19,7 +19,7 @@ BSF_Frontier = []
 plt.imshow(mazeData)
 plt.show()
 # Set goal location
-goal = np.array([67, 92])
+goal = np.array([107, 122])
 
 # Initialize centerline cost-to-go map
 costMap = np.copy(mazeData)

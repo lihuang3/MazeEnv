@@ -41,8 +41,8 @@ class Maze0518Env(core.Env):
         mazeHeight, mazeWidth = self.mazeData.shape
         self.observation_space = spaces.Box(low=0, high=255, shape=(mazeHeight, mazeWidth, 1), dtype=np.uint8)
         self.seed()
-        self.maze = 1 - self.mazeData
-        self.freespace = 1 - self.freespaceData
+        self.maze = 1.0 - self.mazeData
+        self.freespace = 1.0 - self.freespaceData
 
         self.goal = np.array([130, 61])
         self.init_state = []
@@ -103,13 +103,13 @@ class Maze0518Env(core.Env):
         prev_loc = np.copy(self.loc)
         self.loc = np.add(self.loc, np.array([dy, dx]))
         # escaped = np.where(self.outlet[self.loc[:, 0], self.loc[:, 1]] == 2.0)
-        collision = np.where(self.freespace[self.loc[:, 0], self.loc[:, 1]] == 1.0)
+        collision = np.where(self.freespace[self.loc[:, 0], self.loc[:, 1]] == 1.0)        
         escaped = np.where(self.outlet[self.loc[collision, 0], self.loc[collision, 1]]==2.0)[1]
         self.loc[collision, :] = prev_loc[collision, :]
-        if len(escaped)>0:
+        if len(escaped)>0 and (self.robot_num - len(escaped)>1):
             self.loc = np.delete(self.loc, collision[0][escaped], axis=0)
-            self.robot_num = self.loc.shape[0]
-
+            self.robot_num = self.loc.shape[0]            
+            
         self.state_img *= 0  
 
         for i in range(self.robot_num):
@@ -123,9 +123,10 @@ class Maze0518Env(core.Env):
 
     def get_reward(self):
         if self.robot_num <= 0.5 * self.robot_num_orig:
-            done = True
-            reward = -500
-            return done, reward
+            done = False
+            reward = - 0.2
+            return (done, reward)
+
         cost_to_go = np.sum(self.costData[self.loc[:, 0], self.loc[:, 1]])
         max_cost_agent = np.max(self.costData[self.loc[:, 0], self.loc[:, 1]])
 
