@@ -46,7 +46,7 @@ class Maze0521Env2(core.Env):
         self.seed()
         self.maze = 1.0 - self.mazeData
         self.freespace = 1.0 - self.freespaceData
-        self.goal = np.array([104, 49])
+        self.goal = np.array([25, 80])
         self.init_state = []
         self.reset()
 
@@ -196,7 +196,7 @@ class Maze0521Env2(core.Env):
 
         self.loc = np.append(self.loc, loc, axis=0)
 
-    def step(self, action):
+    def _step(self, action):
         info = {}
         self.internal_steps += 1
         if self.doses_remain>0 and (self.internal_steps % self.dose_gap == 1) and self.internal_steps>1:
@@ -213,7 +213,7 @@ class Maze0521Env2(core.Env):
         self.output_img = self.state_img + self.maze * 255
         return (np.expand_dims(self.output_img, axis=2), reward, done, info)
 
-    def _step(self, action):
+    def step(self, action):
 
         info = {}
         self.internal_steps += 1
@@ -231,7 +231,7 @@ class Maze0521Env2(core.Env):
             info = {'ac': action}
         # =====================
         # Perpendicular vel is 0.333 (1/3)
-        if self.internal_steps % 3 != 0:
+        if self.internal_steps % 2 != 0:
             dy, dx = 0, 0
             # No updates for locations
         else:
@@ -245,9 +245,10 @@ class Maze0521Env2(core.Env):
             # if len(escaped) > 0 and (self.robot_num - len(escaped) > 1):
             #     self.loc = np.delete(self.loc, collision[0][escaped], axis=0)
             #     self.robot_num = self.loc.shape[0]
-            diff = np.sum( np.abs(self.loc - prev_flow), axis=1)
-            fake_mov = diff != 2
-            self.loc[fake_mov, :] = prev_loc[fake_mov, :]
+
+            # diff = np.sum( np.abs(self.loc - prev_flow), axis=1)
+            # fake_mov = diff != 2
+            # self.loc[fake_mov, :] = prev_loc[fake_mov, :]
         self.state_img *= 0
 
         for i in range(self.robot_num * (self.doses-self.doses_remain) ):

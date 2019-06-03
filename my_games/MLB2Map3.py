@@ -5,7 +5,7 @@ import random, skimage
 ROOT_PATH = os.path.abspath('./MapData')
 
 mapfile = 'map0521'
-filename = 'map0521v1'
+filename = 'map0521'
 
 # Load hand-craft binary maze
 
@@ -27,7 +27,7 @@ dir_dict3 = [[-1, -1], [1, -1], [1, 1], [-1, 1]];
 # Set goal location
 skel = np.asarray(skel_3d(mazeData), dtype=int)
 skel[32, 146]  = 1
-
+#
 # plt.imshow(skel)
 # plt.show()
 rows, cols = np.where(np.logical_and( outletData == 9, skel == 1))
@@ -37,7 +37,7 @@ costMap = np.copy(mazeData)
 pgrad = np.copy(mazeData)
 flowMapCol = 0 * mazeData
 flowMapRow = 0 * mazeData
-goal = [19, 44]
+goal = [25, 80]
 
 # [19, 44]
 
