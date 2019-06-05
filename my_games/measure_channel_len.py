@@ -4,13 +4,12 @@ from skimage.morphology import skeletonize_3d as skel_3d
 import random, skimage
 ROOT_PATH = os.path.abspath('./MapData')
 
-mapfile = 'map0521'
-filename = 'map0521v1'
+mapfile = 'map0522'
+filename = 'map0522'
 
 # Load hand-craft binary maze
 
 mazeData = np.loadtxt(os.path.join(ROOT_PATH, mapfile+'.txt')).astype(int)
-outletData = np.loadtxt(os.path.join(ROOT_PATH, mapfile+'a.csv')).astype(int)
 np.savetxt('{}/{}.csv'.format(ROOT_PATH, filename), mazeData, fmt= '%3d')
 np.savetxt('{}/{}_freespace.csv'.format(ROOT_PATH, filename), mazeData, fmt= '%3d')
 
@@ -31,7 +30,7 @@ skel = np.asarray(skel_3d(fig), dtype=int) / 255
 # skel[32, 146]  = 1
 # skel_Frontier = [[32, 146]]
 
-skel_Frontier = [[109, 480]]
+skel_Frontier = [[107, 445]]
 
 cost = 100
 pgradSkel = np.copy(skel)
@@ -56,7 +55,15 @@ while len(skel_Frontier)>0:
     if not flag:
         endpoint.append(skel_Frontier[0])
     if neighbor >= 3:
-        brchpt[(skel_Frontier[0][0], skel_Frontier[0][1])] = cost - 100
+        isbrch = True
+        for dir in dir_dict1:
+            try:
+                brchpt[(skel_Frontier[0][0]+dir[0], skel_Frontier[0][1]+dir[1])]
+                isbrch = False
+            except KeyError:
+                pass
+        if isbrch:
+            brchpt[(skel_Frontier[0][0], skel_Frontier[0][1])] = cost - 100
     skel_Frontier.pop(0)
 
 pgradSkel[pgradSkel>=100] -= 99

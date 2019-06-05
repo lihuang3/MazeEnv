@@ -78,9 +78,9 @@ class Maze0521Env1(core.Env):
         row, col = np.where(np.logical_and(self.pgradData<=self.init_range, self.pgradData>0 ))
         self.reward_grad = np.zeros(40).astype(np.uint8)
         self.robot_num = 16  # len(row)
-        self.doses = 4
+        self.doses = 6
         self.doses_remain = self.doses - 1
-        self.dose_gap = 50
+        self.dose_gap = 40
         self.robot_num_orig = np.copy(self.robot_num)
         self.robot_num_prev = np.copy(self.robot_num)
         self.robot = random.sample(range(row.shape[0]), self.robot_num)
@@ -266,6 +266,9 @@ class Maze0521Env1(core.Env):
             done = True
             reward += 100
             return done, reward
+        elif delivery_rate >= 0.85 * self.delivery_rate_goal and not self.reward_grad[10]:
+            self.reward_grad[10] = 1
+            reward += 8
         elif delivery_rate >= 0.8 * self.delivery_rate_goal and not self.reward_grad[0]:
             self.reward_grad[0] = 1
             reward += 8
