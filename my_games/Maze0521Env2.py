@@ -1,5 +1,5 @@
 """
-  gym id: Maze0521Env-v2
+  gym id: Maze0522Env-v2
   Input: gray-scale images
   Reward: region range basis (easy)
   Render: gray-scale visualization
@@ -20,7 +20,7 @@ from time import sleep
 plt.ion()
 
 
-class Maze0521Env2(core.Env):
+class Maze0522Env2(core.Env):
     def __init__(self):
 
         dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -29,7 +29,7 @@ class Maze0521Env2(core.Env):
         self.internal_steps = 0
 
         self.robot_marker = 150
-        self.init_range = 15
+        self.init_range = 20
         self.goal_range = 10
         self.delivery_rate_goal = 1.0
         self.actions = [0, 1, 2, 3, 4, 5, 6, 7, 8]  # {N, NE, E, SE, S, SW, W, NW}
@@ -46,7 +46,7 @@ class Maze0521Env2(core.Env):
         self.seed()
         self.maze = 1.0 - self.mazeData
         self.freespace = 1.0 - self.freespaceData
-        self.goal = np.array([25, 80])
+        self.goal = np.array([158, 18])
         self.init_state = []
         self.reset()
 
@@ -55,13 +55,13 @@ class Maze0521Env2(core.Env):
         return [seed]
 
     def _load_data(self, data_directory):
-        filename = 'map0521'
+        filename = 'map0522'
         self.mazeData = np.loadtxt(data_directory + '/' + filename + '.csv').astype(int)
         self.freespaceData = np.loadtxt(data_directory + '/' + filename + '_freespace.csv').astype(int)
         self.costData = np.loadtxt(data_directory + '/' + filename + '_costmap.csv').astype(int)
         self.pgradData = np.loadtxt(data_directory + '/' + filename + '_pgrad.csv').astype(int)
-        self.outletData = np.loadtxt(data_directory + '/' + filename + 'a.csv').astype(int)
         self.flowstatsData = np.loadtxt(data_directory + '/' + filename + '_flowstats.csv').astype(float)
+        self.visitData = np.loadtxt(data_directory + '/' + filename + '_visit.csv').astype(float)
         self.get_flowmap()
         self.get_flowstats()
 
@@ -77,20 +77,23 @@ class Maze0521Env2(core.Env):
         row, col = np.where(np.logical_and(self.pgradData<=self.init_range, self.pgradData>0 ))
         self.reward_grad = np.zeros(40).astype(np.uint8)
         self.robot_num = 16  # len(row)
-        self.doses = 3
+        self.doses = 16
         self.doses_remain = self.doses - 1
-        self.dose_gap = 70
+        self.dose_gap = 8
         self.robot_num_orig = np.copy(self.robot_num)
         self.robot_num_prev = np.copy(self.robot_num)
-        self.robot = random.sample(range(row.shape[0]), self.robot_num)
+        probs = self.visitData[row, col] / np.sum(self.visitData[row, col])
+        self.robot = np.random.choice(row.shape[0], self.robot_num, p=probs)
+        # self.robot = random.sample(range(row.shape[0]), self.robot_num)
+
         self.state = np.zeros(np.shape(self.mazeData)).astype(int)
         self.state_img = np.copy(self.state)
         self.loc = np.zeros([self.robot_num, 2]).astype(np.int32)
         for i in range(self.robot_num):
             self.loc[i, :] = row[self.robot[i]], col[self.robot[i]]
             self.state[row[self.robot[i]], col[self.robot[i]]] += self.robot_marker
-            self.state_img[row[self.robot[i]] - 1:row[self.robot[i]] + 1,
-            col[self.robot[i]] - 1:col[self.robot[i]] + 1] = self.robot_marker
+            self.state_img[row[self.robot[i]] - 1:row[self.robot[i]] + 2,
+            col[self.robot[i]] - 1:col[self.robot[i]] + 2] = self.robot_marker
         self.init_state = self.state
         self.init_state_img = self.state_img
         self.output_img = self.state_img + self.maze * 255
@@ -189,31 +192,36 @@ class Maze0521Env2(core.Env):
 
     def respawn(self):
         row, col = np.where(np.logical_and(self.pgradData<=self.init_range, self.pgradData>0 ))
-        robot = random.sample(range(row.shape[0]), self.robot_num)
+        probs = self.visitData[row, col] / np.sum(self.visitData[row, col])
+        robot = np.random.choice(row.shape[0], self.robot_num, p=probs)
+        # robot = random.sample(range(row.shape[0]), self.robot_num)
         loc = np.zeros([self.robot_num, 2]).astype(np.int32)
         for i in range(self.robot_num):
             loc[i, :] = row[robot[i]], col[robot[i]]
 
         self.loc = np.append(self.loc, loc, axis=0)
 
-    def _step(self, action):
+    def step(self, action):
         info = {}
         self.internal_steps += 1
         if self.doses_remain>0 and (self.internal_steps % self.dose_gap == 1) and self.internal_steps>1:
             self.doses_remain -= 1
             self.respawn()
-        self.flow_step()
+
+        for _ in range(3):
+            self.flow_step()
+
         done, reward = self.get_reward()
         self.state_img *= 0
 
         for i in range(self.robot_num * (self.doses-self.doses_remain)):
-            self.state_img[self.loc[i, 0] - 1:self.loc[i, 0] + 1,
-            self.loc[i, 1] - 1:self.loc[i, 1] + 1] = self.robot_marker
+            self.state_img[self.loc[i, 0] - 1:self.loc[i, 0] + 2,
+            self.loc[i, 1] - 1:self.loc[i, 1] + 2] = self.robot_marker
 
         self.output_img = self.state_img + self.maze * 255
         return (np.expand_dims(self.output_img, axis=2), reward, done, info)
 
-    def step(self, action):
+    def _step(self, action):
 
         info = {}
         self.internal_steps += 1
@@ -221,8 +229,8 @@ class Maze0521Env2(core.Env):
             self.doses_remain -= 1
             self.respawn()
 
-        prev_flow = np.copy(self.loc)
-        self.flow_step()
+        for _ in range(3):
+            self.flow_step()
 
         # =====================
         # Transfer learning
@@ -230,30 +238,24 @@ class Maze0521Env2(core.Env):
             action = self.instructor()
             info = {'ac': action}
         # =====================
-        # Perpendicular vel is 0.333 (1/3)
-        if self.internal_steps % 2 != 0:
-            dy, dx = 0, 0
-            # No updates for locations
-        else:
-            dy, dx = self.action_map[action]
-            prev_loc = np.copy(self.loc)
-            self.loc = np.add(self.loc, np.array([dy, dx]))
-            # escaped = np.where(self.outlet[self.loc[:, 0], self.loc[:, 1]] == 2.0)
-            collision = np.where(self.freespace[self.loc[:, 0], self.loc[:, 1]] == 1.0)
-            # escaped = np.where(self.outletData[self.loc[collision, 0], self.loc[collision, 1]] == 2.0)[1]
-            self.loc[collision, :] = prev_loc[collision, :]
-            # if len(escaped) > 0 and (self.robot_num - len(escaped) > 1):
-            #     self.loc = np.delete(self.loc, collision[0][escaped], axis=0)
-            #     self.robot_num = self.loc.shape[0]
 
-            # diff = np.sum( np.abs(self.loc - prev_flow), axis=1)
-            # fake_mov = diff != 2
-            # self.loc[fake_mov, :] = prev_loc[fake_mov, :]
+        dy, dx = self.action_map[action]
+
+        prev_loc = np.copy(self.loc)
+        self.loc = np.add(self.loc, np.array([dy, dx]))
+        # escaped = np.where(self.outlet[self.loc[:, 0], self.loc[:, 1]] == 2.0)
+        collision = np.where(self.freespace[self.loc[:, 0], self.loc[:, 1]] == 1.0)
+        # escaped = np.where(self.outletData[self.loc[collision, 0], self.loc[collision, 1]] == 2.0)[1]
+        self.loc[collision, :] = prev_loc[collision, :]
+        # if len(escaped) > 0 and (self.robot_num - len(escaped) > 1):
+        #     self.loc = np.delete(self.loc, collision[0][escaped], axis=0)
+        #     self.robot_num = self.loc.shape[0]
+
         self.state_img *= 0
 
         for i in range(self.robot_num * (self.doses-self.doses_remain) ):
-            self.state_img[self.loc[i, 0] - 1:self.loc[i, 0] + 1,
-            self.loc[i, 1] - 1:self.loc[i, 1] + 1] = self.robot_marker
+            self.state_img[self.loc[i, 0] - 1:self.loc[i, 0] + 2,
+            self.loc[i, 1] - 1:self.loc[i, 1] + 2] = self.robot_marker
 
         self.output_img = self.state_img + self.maze * 255
 
@@ -268,7 +270,7 @@ class Maze0521Env2(core.Env):
         self.delivery_rate = delivery_rate = cost_arr.shape[0]/(self.robot_num * self.doses)
 
         done = False
-        reward = -0.1
+        reward = -0.05
         if delivery_rate >= 0.90 * self.delivery_rate_goal:
             done = True
             reward += 100
@@ -310,8 +312,8 @@ class Maze0521Env2(core.Env):
 
         render_image = np.copy(0 * self.maze).astype(np.int16)
         for i in range(self.robot_num * (self.doses-self.doses_remain) ):
-            render_image[self.loc[i, 0] - 1:self.loc[i, 0] + 1,
-            self.loc[i, 1] - 1:self.loc[i, 1] + 1] += self.robot_marker
+            render_image[self.loc[i, 0] - 1:self.loc[i, 0] + 2,
+            self.loc[i, 1] - 1:self.loc[i, 1] + 2] += self.robot_marker
 
         row, col = np.nonzero(render_image)
         min_robots = 150.
@@ -415,7 +417,7 @@ def main(MazeEnv):
         rewards += reward
         env.render()
         print('Step = %d, delivery_rate = %.2f, rewards = %.1f, reward = %.1f, done = %d' % (steps, env.delivery_rate, rewards, reward, done))
-        if steps % 300 == 0:
+        if steps % 320 == 0:
             done = True
 
         if done:
@@ -429,6 +431,6 @@ def main(MazeEnv):
 
 
 if __name__ == '__main__':
-    main(Maze0521Env2)
+    main(Maze0522Env2)
 
 

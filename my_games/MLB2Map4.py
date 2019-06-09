@@ -4,14 +4,14 @@ from skimage.morphology import skeletonize_3d as skel_3d
 import random, skimage
 ROOT_PATH = os.path.abspath('./MapData')
 
-mapfile = 'map0522'
-filename = 'map0522'
+mapfile = 'map0523'
+filename = 'map0523v1'
 
 # Load hand-craft binary maze
 
 mazeData = np.loadtxt(os.path.join(ROOT_PATH, mapfile+'.txt')).astype(int)
-np.savetxt('{}/{}.csv'.format(ROOT_PATH, filename), mazeData, fmt= '%3d')
-np.savetxt('{}/{}_freespace.csv'.format(ROOT_PATH, filename), mazeData, fmt= '%3d')
+np.savetxt('{}/{}.csv'.format(ROOT_PATH, mapfile), mazeData, fmt= '%3d')
+np.savetxt('{}/{}_freespace.csv'.format(ROOT_PATH, mapfile), mazeData, fmt= '%3d')
 
 dir_dict1 = [[-1, 0], [0, -1], [1, 0], [0, 1], [1, 1], [1, -1], [-1, 1], [-1, -1]]
 dir_dict1_map1 = {0: [-1, 0], 1:[0, -1], 2:[1, 0], 3:[0, 1], 4:[1, 1], 5:[1, -1], 6:[-1, 1], 7:[-1, -1]}
@@ -25,22 +25,39 @@ dir_dict3 = [[-1, -1], [1, -1], [1, 1], [-1, 1]];
 
 # Set goal location
 skel = np.asarray(skel_3d(mazeData), dtype=int)
-skel[42, 178:185] = 1
-start = [42, 184]
-#
+
+## For Map0522
+# for i in range(1,6):
+#     skel[31-i, 181+i] = 1
+# start = [26, 186]
+
+## For Map 523
+skel[73, 181:186] = 1
+start = [73, 186]
 
 plt.imshow(skel + mazeData)
 plt.show()
 
-# Initialize centerline cost-to-go map
+
+##++++++++++++++++++++++++++++++++++++++++++++
+"""
+Configure cost-to-go map
+"""
+##++++++++++++++++++++++++++++++++++++++++++++
+
 costMap = np.copy(mazeData)
 pgrad = np.copy(mazeData)
 flowMapCol = 0 * mazeData
 flowMapRow = 0 * mazeData
-goal = [158, 18]
-#[158, 18]
-#[22, 56]
+goal = [37, 36]
 
+## for map0522
+# v0 [158, 18]
+# v1 [22, 56]
+
+## For map0523
+# v0 [68, 45]
+# v1 [37, 36]
 
 BSF_Frontier = []
 BSF_Frontier.append(goal)
@@ -58,24 +75,30 @@ while len(BSF_Frontier)>0:
 
 costMap[costMap>=100] -= 99
 np.savetxt('{}/{}_costmap.csv'.format(ROOT_PATH, filename), costMap, fmt = '%5i')
+##++++++++++++++++++++++++++++++++++++++++++++
 
 
+
+##++++++++++++++++++++++++++++++++++++++++++++
+"""
+Configure pressure graidient
+"""
+##++++++++++++++++++++++++++++++++++++++++++++
 
 cost = 100
 skel_Frontier = []
 BSF_Frontier = []
-
 skel_Frontier.append(start)
 
-# BSF_Frontier.append(start)
-# pgrad[BSF_Frontier[-1][0], BSF_Frontier[-1][1]] = cost
+# Single source
+BSF_Frontier.append(start)
+pgrad[BSF_Frontier[-1][0], BSF_Frontier[-1][1]] = cost
 
-# Manual step
-pgrad[35:50, 184] = 100
-rows, cols = np.where(pgrad == 100)
-
-for row, col in zip(rows, cols):
-    BSF_Frontier.append([row, col])
+# Multi-source
+# pgrad[42, 179:184] = 100
+# rows, cols = np.where(pgrad == 100)
+# for row, col in zip(rows, cols):
+#     BSF_Frontier.append([row, col])
 
 while len(BSF_Frontier)>0:
     cost = pgrad[BSF_Frontier[0][0],BSF_Frontier[0][1]] + 1
@@ -98,6 +121,7 @@ pgrad[pgrad>=100] -= 99
 cost = 100
 pgradSkel = np.copy(skel)
 pgradSkel[skel_Frontier[-1][0], skel_Frontier[-1][1]] = cost
+##++++++++++++++++++++++++++++++++++++++++++++
 
 
 
@@ -147,6 +171,8 @@ plt.show()
 
 brch_level = {}
 
+brch_dict = {}
+
 for item in brchpt:
     BSF_frontier = [item]
     cost_init = pgradSkel[item[0], item[1]]
@@ -159,6 +185,7 @@ for item in brchpt:
             if pgradSkel[new_pt[0], new_pt[1]] == cost:
                 if cost == 1:
                     brch_level[item] = 1
+                    brch_dict[item] = new_pt
                     find = True
                     break
                 try:
@@ -167,6 +194,7 @@ for item in brchpt:
                         brch_level[item] = brch_level[(new_pt[0], new_pt[1])] + 1
                     else:
                         brch_level[item] = brch_level[(new_pt[0], new_pt[1])]
+                    brch_dict[item] = new_pt
                     find = True
                     break
                 except KeyError:
@@ -190,13 +218,14 @@ Distribute robots in endpoints
 """
 ##++++++++++++++++++++++++++++++++++++++++++++
 
-thresh = 10
-num_robot = 256 + 128
+num_robot = 512
 
 endpoint = outlet_Frontier
 loc = np.zeros([num_robot, 2], dtype = np.int32)
 robot_cnt = 0
 loc_generator = []
+
+endpoint_brchpts_dict = {}
 
 for item in endpoint:
     BSF_Frontier = []
@@ -210,6 +239,7 @@ for item in endpoint:
             if pgradSkel[new_pt[0], new_pt[1]] == cost:
                 try:
                     level = brch_level[(new_pt[0], new_pt[1])]
+                    endpoint_brchpts_dict[(item[0], item[1])] = new_pt
                     find = True
                     break
                 except KeyError:
@@ -247,6 +277,228 @@ plt.imshow(tmp_fig)
 plt.show()
 ##++++++++++++++++++++++++++++++++++++++++++++
 
+for item in endpoint_brchpts_dict:
+    brch = endpoint_brchpts_dict[item]
+    predecessors = [brch]
+    while 1:
+        try:
+            tmp = brch_dict[(brch[0], brch[1])]
+            brch = tmp
+            predecessors.append(brch)
+        except KeyError:
+            break
+    endpoint_brchpts_dict[item] = predecessors
+
+
+##++++++++++++++++++++++++++++++++++++++++++++
+"""
+Identify brch slopes
+"""
+##++++++++++++++++++++++++++++++++++++++++++++
+
+brch_slope_upstream = {}
+brch_slope_downstream = {}
+tail_len = 12
+head_len = 12
+
+
+
+for item in brchpt:
+    BSF_frontier = [item]
+    cost_init = pgradSkel[item[0], item[1]]
+    tail = []
+    head = []
+    find = False
+    while not find:
+        cost = pgradSkel[BSF_frontier[0][0], BSF_frontier[0][1]] -1
+        for dir in dir_dict1:
+            new_pt = BSF_frontier[0] + np.array(dir)
+            if pgradSkel[new_pt[0], new_pt[1]] == cost:
+                if cost_init - cost <= tail_len:
+                    tail_pt = new_pt
+                    tail.append(tail_pt)
+
+                head_pt = new_pt
+                head.append(new_pt)
+
+                if cost == 1:
+                    find = True
+                    break
+                try:
+                    brchpt[(new_pt[0], new_pt[1])]
+                    find = True
+                    break
+                except KeyError:
+                    BSF_frontier.append(new_pt)
+        BSF_frontier.pop(0)
+
+    ## Visualize upstream tail
+    # tmp_fig = np.copy(skel + mazeData)
+    # for i in range(len(tail)):
+    #     tmp_fig[tail[i][0], tail[i][1]] = 10
+    # plt.imshow(tmp_fig)
+    # plt.show()
+    slope = item - tail_pt
+    brch_slope_upstream[item] = slope
+    if cost != 1:
+        if len(head) >= head_len:
+            head = head[-head_len:]
+        slope = head[0] - head[-1]
+        brch_slope_downstream[item] = slope
+        ## Visualize downstream head
+        # tmp_fig = np.copy(skel + mazeData)
+        # for i in range(len(head)):
+        #     tmp_fig[head[i][0], head[i][1]] = 10
+        # plt.imshow(tmp_fig)
+        # plt.show()
+
+
+for item in endpoint:
+    BSF_frontier = [item]
+    cost_init = pgradSkel[item[0], item[1]]
+    head = []
+    find = False
+    while not find:
+        cost = pgradSkel[BSF_frontier[0][0], BSF_frontier[0][1]] -1
+        for dir in dir_dict1:
+            new_pt = BSF_frontier[0] + np.array(dir)
+            if pgradSkel[new_pt[0], new_pt[1]] == cost:
+                head_pt = new_pt
+                head.append(new_pt)
+
+                if cost == 1:
+                    find = True
+                    break
+                try:
+                    brchpt[(new_pt[0], new_pt[1])]
+                    find = True
+                    break
+                except KeyError:
+                    BSF_frontier.append(new_pt)
+        BSF_frontier.pop(0)
+
+    if len(head) >= head_len:
+        head = head[-head_len:]
+    slope = head[0] - head[-1]
+    brch_slope_downstream[(item[0], item[1])] = slope
+    ## Visualize downstream head
+    # tmp_fig = np.copy(skel + mazeData)
+    # for i in range(len(head)):
+    #     tmp_fig[head[i][0], head[i][1]] = 10
+    # plt.imshow(tmp_fig)
+    # plt.show()
+
+
+endpt_brch_slope_dict = {}
+endpt_brch_control_dict = {}
+
+for idx, item in enumerate(endpoint_brchpts_dict):
+    brchs = endpoint_brchpts_dict[item]
+    slope = [brch_slope_downstream[item], brch_slope_upstream[(brchs[0][0], brchs[0][1])]]
+    endpt_brch_slope_dict[item] = {(brchs[0][0], brchs[0][1]):slope}
+    candit1 = np.array([slope[1][1], -slope[1][0]], dtype=np.float)
+    candit2 = np.array([-slope[1][1], slope[1][0]], dtype=np.float)
+    if np.dot(candit1, slope[0]) > 0:
+        control = candit1
+    else:
+        control = candit2
+    dir = dir_dict1[np.argmax(np.dot(np.array(dir_dict1), control))]
+    endpt_brch_control_dict[item] = {(brchs[0][0], brchs[0][1]): dir}
+    for i in range(1, len(brchs)-1):
+        slope = [brch_slope_downstream[(brchs[i-1][0], brchs[i-1][1])], brch_slope_upstream[(brchs[i][0], brchs[i][1])]]
+        endpt_brch_slope_dict[item].update({(brchs[i][0], brchs[i][1]): slope})
+
+        candit1 = np.array([slope[1][1], -slope[1][0]], dtype=np.float)
+        candit2 = np.array([-slope[1][1], slope[1][0]], dtype=np.float)
+        if np.dot(candit1, slope[0]) > 0:
+            control = candit1
+        else:
+            control = candit2
+        dir = dir_dict1[np.argmax(np.dot(np.array(dir_dict1), control))]
+        endpt_brch_control_dict[item].update({(brchs[i][0], brchs[i][1]): dir})
+
+        ## Visualize downstream head
+        # tmp_fig = np.copy(skel + mazeData)
+        # line1 = [brchs[i], brchs[i] + slope[1]]
+        # y1, x1 = [line1[0][0], line1[1][0]], [line1[0][1], line1[1][1]]
+        # line2 = [brchs[i], brchs[i] + np.dot(dir,5)]
+        # y2, x2 = [line2[0][0], line2[1][0]], [line2[0][1], line2[1][1]]
+        # plt.imshow(tmp_fig)
+        # plt.plot(x1,y1,x2,y2)
+        # plt.scatter(brchs[i][1], brchs[i][0])
+        # plt.show()
+
+endpt_brch_control_map = np.zeros([len(endpoint_brchpts_dict), 40], dtype=np.int16)
+endpt_brch_map = np.zeros([len(endpoint_brchpts_dict), 20], dtype=np.int16)
+
+for idx, item in enumerate(endpoint_brchpts_dict):
+    brchs = endpoint_brchpts_dict[item]
+    endpt_brch_map[idx, :2] = np.array([item[0], item[1]], dtype=np.int16)
+    endpt_brch_control_map[idx, :2] = np.array([item[0], item[1]], dtype=np.int16)
+    endpt_brch_map[idx,2] = len(brchs) - 1
+    endpt_brch_control_map[idx, 2] = len(brchs) - 1
+    for i in range(len(brchs)-1):
+        endpt_brch_map[idx, 3+2*i:3+2*i+2] = brchs[i]
+        endpt_brch_control_map[idx, 3+2*i:3+2*i+2] = endpt_brch_control_dict[item][(brchs[i][0], brchs[i][1])]
+
+np.savetxt('{}/{}_endpt_brch_map.csv'.format(ROOT_PATH, mapfile), endpt_brch_map, fmt = '%5i')
+np.savetxt('{}/{}_endpt_brch_control_map.csv'.format(ROOT_PATH, mapfile), endpt_brch_control_map, fmt = '%5i')
+
+
+# Find patches
+detection_map = 0 * mazeData
+detection_patch = np.zeros([len(brchpt), 500], dtype=np.int16)
+thresh = 6
+for i,brch in enumerate(brchpt):
+    tmp_map = 0 * mazeData
+    grad = pgrad[brch[0], brch[1]]
+    tmp_map[np.logical_and(pgrad<=grad+1, pgrad>=grad-thresh)] = 1
+    BSF_Frontier = [brch]
+    while len(BSF_Frontier)>0:
+        for dir in dir_dict1:
+            new_pt = BSF_Frontier[0] + np.array(dir)
+            if pgrad[new_pt[0], new_pt[1]] <=grad+1\
+                    and pgrad[new_pt[0], new_pt[1]] >=grad-thresh \
+                    and tmp_map[new_pt[0],new_pt[1]]==1:
+                BSF_Frontier.append(new_pt)
+                tmp_map[new_pt[0],new_pt[1]] = 2
+        BSF_Frontier.pop(0)
+    tmp_map[tmp_map<2] = 0
+    # plt.imshow(tmp_map+mazeData)
+    # plt.show()
+    detection_map += tmp_map
+    rows, cols = np.where(tmp_map>0)
+    detection_patch[i, :2] = brch
+    detection_patch[i, 2] = rows.shape[0]
+    tl_row, tl_col = min(rows), min(cols)
+    br_row, br_col = max(rows), max(cols)
+    detection_patch[i, 3:7] = [tl_row, br_row, tl_col, br_col]
+    detection_patch[i, 7:7+rows.shape[0]] = rows
+    detection_patch[i, 7+rows.shape[0]: 7+2*rows.shape[0]] = cols
+
+np.savetxt('{}/{}_detect_patch.csv'.format(ROOT_PATH, mapfile), detection_patch, fmt = '%5i')
+
+plt.imshow(detection_map+mazeData)
+plt.show()
+
+
+    # detection_bbox[i,:2] = brch[:]
+    # detection_bbox[2:] = [tl_row, tl_col, br_row, br_col]
+
+
+## Visualize brchpoint predecessors
+# for item in endpoint_brchpts_dict:
+#     tmp_fig = np.copy(skel + mazeData)
+#     brchs = endpoint_brchpts_dict[item]
+#     for i in range(len(brchs) ):
+#         tmp_fig[brchs[i][0], brchs[i][1]] = 10
+#     plt.imshow(tmp_fig)
+#     plt.show()
+
+##++++++++++++++++++++++++++++++++++++++++++++
+
+
+
 
 ##++++++++++++++++++++++++++++++++++++++++++++
 """
@@ -264,19 +516,14 @@ for row, col in zip(rows, cols):
     candit = []
     for dir in dir_dict1:
         new_pt = np.array([row, col]) + np.array(dir)
-        if pgrad[new_pt[0], new_pt[1]] == cost - 1:
+        if pgrad[new_pt[0], new_pt[1]] == cost - 1 or pgrad[new_pt[0], new_pt[1]] == cost:
             candit.append(dir)
     dirs = candit
     prob = np.ones([len(dirs)]) / len(dirs)
     flow_dict[(row, col)] = [dirs, prob]
 ##++++++++++++++++++++++++++++++++++++++++++++
 
-for brch in brch_level:
-    if brch_level[brch] == 1:
-        first_brch = brch
-        break
-loc_int = np.copy(loc)
-flow_map = {}
+
 
 def render(loc):
     plt.gcf().clear()
@@ -309,6 +556,14 @@ def render(loc):
     plt.show(False)
     plt.pause(0.0001)
 
+for brch in brch_level:
+    if brch_level[brch] == 1:
+        first_brch = brch
+        break
+loc_int = np.copy(loc)
+flow_map = {}
+visit_stats = 0 * mazeData
+
 def step():
     stay = 0
     for i in range(len(loc)):
@@ -320,7 +575,6 @@ def step():
         else:
             item = flow_dict[(row, col)]
             dirs, probs = item[0], item[1]
-
             idx = np.random.choice(len(dirs), 1, p=probs)[0]
             dir = dirs[idx]
             loc[i,:] += np.array(dir)
@@ -331,13 +585,15 @@ def step():
             except KeyError:
                 flow_map[(row, col)] = np.zeros([8], dtype=np.int32)
                 flow_map[(row, col)][dir_dict1_map2[(dir[0],dir[1])]] = 1
-    render(loc)
+    visit_stats[loc[:,0], loc[:,1]] += 1
+    # render(loc)
+
     return stay == len(loc)
 
 
 round = 0
 diff = len(np.where(pgrad>1)[0])-len(flow_map)
-while round<80:
+while round<50:
     print(round, diff)
     # loc = np.copy(loc_int)
     robot_cnt = 0
@@ -347,8 +603,6 @@ while round<80:
         loc[robot_cnt:robot_cnt + local_robot, 0] = rows[idx]
         loc[robot_cnt:robot_cnt + local_robot, 1] = cols[idx]
         robot_cnt += local_robot
-
-
 
     while 1:
         done = step()
@@ -371,6 +625,8 @@ idx = np.where(validout>=10)[0]
 output[idx,0] = np.array(idx).astype(np.float32)
 output = output[idx,:]
 
-np.savetxt('{}/{}_flowstats.csv'.format(ROOT_PATH, filename), output, fmt = '%.1f')
-np.savetxt('{}/{}_pgrad.csv'.format(ROOT_PATH, filename), pgrad, fmt = '%5i')
+np.savetxt('{}/{}_flowstats.csv'.format(ROOT_PATH, mapfile), output, fmt = '%.1f')
+np.savetxt('{}/{}_pgrad.csv'.format(ROOT_PATH, mapfile), pgrad, fmt = '%5i')
+np.savetxt('{}/{}_visit.csv'.format(ROOT_PATH, mapfile), visit_stats, fmt = '%5i')
+
 

@@ -1,5 +1,5 @@
 """
-  gym id: Maze0522Env-v0
+  gym id: Maze0523Env-v1
   Input: gray-scale images
   Reward: region range basis (easy)
   Render: gray-scale visualization
@@ -20,7 +20,7 @@ from time import sleep
 plt.ion()
 
 
-class Maze0522Env(core.Env):
+class Maze0523Env1(core.Env):
     def __init__(self):
 
         dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -31,6 +31,7 @@ class Maze0522Env(core.Env):
         self.robot_marker = 150
         self.init_range = 20
         self.goal_range = 10
+        self.delivery_rate_goal = 1.0
         self.actions = [0, 1, 2, 3, 4, 5, 6, 7, 8]  # {N, NE, E, SE, S, SW, W, NW}
         # self.action_dict = {0: (-1, 0), 1: (1, 0), 2: (-1, 1), 3: (1, 1)}  # {up, down, left ,right}
         self.action_map = {0: (1, 0), 1: (1, 1), 2: (0, 1), 3: (-1, 1),
@@ -45,7 +46,7 @@ class Maze0522Env(core.Env):
         self.seed()
         self.maze = 1.0 - self.mazeData
         self.freespace = 1.0 - self.freespaceData
-        self.goal = np.array([158, 18])
+        self.goal = np.array([68, 45])
         self.init_state = []
         self.reset()
 
@@ -54,20 +55,22 @@ class Maze0522Env(core.Env):
         return [seed]
 
     def _load_data(self, data_directory):
-        filename = 'map0522'
-        self.mazeData = np.loadtxt(data_directory + '/' + filename + '.csv').astype(int)
-        self.freespaceData = np.loadtxt(data_directory + '/' + filename + '_freespace.csv').astype(int)
+        mapname = 'map0523'
+        filename = 'map0523v1'
+
+        self.mazeData = np.loadtxt(data_directory + '/' + mapname + '.csv').astype(int)
+        self.freespaceData = np.loadtxt(data_directory + '/' + mapname + '_freespace.csv').astype(int)
         self.costData = np.loadtxt(data_directory + '/' + filename + '_costmap.csv').astype(int)
-        self.pgradData = np.loadtxt(data_directory + '/' + filename + '_pgrad.csv').astype(int)
-        self.flowstatsData = np.loadtxt(data_directory + '/' + filename + '_flowstats.csv').astype(float)
-        self.visitData = np.loadtxt(data_directory + '/' + filename + '_visit.csv').astype(float)
+        self.pgradData = np.loadtxt(data_directory + '/' + mapname + '_pgrad.csv').astype(int)
+        self.flowstatsData = np.loadtxt(data_directory + '/' + mapname + '_flowstats.csv').astype(float)
+        self.visitData = np.loadtxt(data_directory + '/' + mapname + '_visit.csv').astype(float)
+
         self.get_flowmap()
         self.get_flowstats()
 
 
     def _build_robot(self):
         self.internal_steps = 0
-        self.delivery_rate_thresh = 0.7
 
         # ======================
         # For transfer learning only
@@ -201,7 +204,7 @@ class Maze0522Env(core.Env):
 
         self.loc = np.append(self.loc, loc, axis=0)
 
-    def _step(self, action):
+    def step(self, action):
         info = {}
         self.internal_steps += 1
         if self.doses_remain>0 and (self.internal_steps % self.dose_gap == 1) and self.internal_steps>1:
@@ -221,7 +224,7 @@ class Maze0522Env(core.Env):
         self.output_img = self.state_img + self.maze * 255
         return (np.expand_dims(self.output_img, axis=2), reward, done, info)
 
-    def step(self, action):
+    def _step(self, action):
 
         info = {}
         self.internal_steps += 1
@@ -271,35 +274,38 @@ class Maze0522Env(core.Env):
 
         done = False
         reward = -0.05
-        if delivery_rate >= 0.90 :
+        if delivery_rate >= 0.90 * self.delivery_rate_goal:
             done = True
             reward += 100
             return done, reward
-        elif delivery_rate >= self.delivery_rate_thresh:
-            reward += 100 * (delivery_rate - self.delivery_rate_thresh)
-            self.delivery_rate_thresh = delivery_rate
-        elif delivery_rate >= 0.7  and not self.reward_grad[1]:
+        elif delivery_rate >= 0.85 * self.delivery_rate_goal and not self.reward_grad[10]:
+            self.reward_grad[10] = 1
+            reward += 8
+        elif delivery_rate >= 0.8 * self.delivery_rate_goal and not self.reward_grad[0]:
+            self.reward_grad[0] = 1
+            reward += 8
+        elif delivery_rate >= 0.7 * self.delivery_rate_goal and not self.reward_grad[1]:
             self.reward_grad[1] = 1
             reward += 4
-        elif delivery_rate >= 0.6  and not self.reward_grad[2]:
+        elif delivery_rate >= 0.6 * self.delivery_rate_goal and not self.reward_grad[2]:
             self.reward_grad[2] = 1
             reward += 4
-        elif delivery_rate >= 0.5  and not self.reward_grad[3]:
+        elif delivery_rate >= 0.5 * self.delivery_rate_goal and not self.reward_grad[3]:
             self.reward_grad[3] = 1
             reward += 4
-        elif delivery_rate >= 0.4  and not self.reward_grad[4]:
+        elif delivery_rate >= 0.4 * self.delivery_rate_goal and not self.reward_grad[4]:
             self.reward_grad[4] = 1
             reward += 2
-        elif delivery_rate >= 0.3  and not self.reward_grad[5]:
+        elif delivery_rate >= 0.3 * self.delivery_rate_goal and not self.reward_grad[5]:
             self.reward_grad[5] = 1
             reward += 2
-        elif delivery_rate >= 0.2  and not self.reward_grad[6]:
+        elif delivery_rate >= 0.2 * self.delivery_rate_goal and not self.reward_grad[6]:
             self.reward_grad[6] = 1
             reward += 2
-        elif delivery_rate >= 0.1  and not self.reward_grad[7]:
+        elif delivery_rate >= 0.1 * self.delivery_rate_goal and not self.reward_grad[7]:
             self.reward_grad[7] = 1
             reward += 1
-        elif delivery_rate >= 0.05  and not self.reward_grad[8]:
+        elif delivery_rate >= 0.05 * self.delivery_rate_goal and not self.reward_grad[8]:
             self.reward_grad[8] = 1
             reward += 1
         return done, reward
@@ -410,11 +416,11 @@ def main(MazeEnv):
         steps += 1
         # next_action = np.random.randint(4,size = 1)
         next_action, robot_id = env.expert(robot_id)
-        state_img, reward, done, _ = env._step(next_action)
+        state_img, reward, done, _ = env.step(next_action)
         rewards += reward
         env.render()
         print('Step = %d, delivery_rate = %.2f, rewards = %.1f, reward = %.1f, done = %d' % (steps, env.delivery_rate, rewards, reward, done))
-        if steps % 320 == 0:
+        if steps % 300 == 0:
             done = True
 
         if done:
@@ -428,6 +434,6 @@ def main(MazeEnv):
 
 
 if __name__ == '__main__':
-    main(Maze0522Env)
+    main(Maze0523Env1)
 
 

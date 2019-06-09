@@ -1,5 +1,5 @@
 """
-  gym id: Maze0522Env-v0
+  gym id: Maze0522Env-v4
   Input: gray-scale images
   Reward: region range basis (easy)
   Render: gray-scale visualization
@@ -20,7 +20,7 @@ from time import sleep
 plt.ion()
 
 
-class Maze0522Env(core.Env):
+class Maze0522Env4(core.Env):
     def __init__(self):
 
         dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -68,7 +68,6 @@ class Maze0522Env(core.Env):
     def _build_robot(self):
         self.internal_steps = 0
         self.delivery_rate_thresh = 0.7
-
         # ======================
         # For transfer learning only
         self.tflearn = False
@@ -76,10 +75,10 @@ class Maze0522Env(core.Env):
         # ======================
         row, col = np.where(np.logical_and(self.pgradData<=self.init_range, self.pgradData>0 ))
         self.reward_grad = np.zeros(40).astype(np.uint8)
-        self.robot_num = 32  # len(row)
-        self.doses = 4
+        self.robot_num = 8  # len(row)
+        self.doses = 16
         self.doses_remain = self.doses - 1
-        self.dose_gap = 64
+        self.dose_gap = 12
         self.robot_num_orig = np.copy(self.robot_num)
         self.robot_num_prev = np.copy(self.robot_num)
         probs = self.visitData[row, col] / np.sum(self.visitData[row, col])
@@ -414,7 +413,7 @@ def main(MazeEnv):
         rewards += reward
         env.render()
         print('Step = %d, delivery_rate = %.2f, rewards = %.1f, reward = %.1f, done = %d' % (steps, env.delivery_rate, rewards, reward, done))
-        if steps % 320 == 0:
+        if steps % 280 == 0:
             done = True
 
         if done:
@@ -428,6 +427,6 @@ def main(MazeEnv):
 
 
 if __name__ == '__main__':
-    main(Maze0522Env)
+    main(Maze0522Env4)
 
 

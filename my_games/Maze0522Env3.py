@@ -1,5 +1,5 @@
 """
-  gym id: Maze0522Env-v0
+  gym id: Maze0522Env-v3
   Input: gray-scale images
   Reward: region range basis (easy)
   Render: gray-scale visualization
@@ -20,7 +20,7 @@ from time import sleep
 plt.ion()
 
 
-class Maze0522Env(core.Env):
+class Maze0522Env3(core.Env):
     def __init__(self):
 
         dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -45,7 +45,7 @@ class Maze0522Env(core.Env):
         self.seed()
         self.maze = 1.0 - self.mazeData
         self.freespace = 1.0 - self.freespaceData
-        self.goal = np.array([158, 18])
+        self.goal = np.array([22, 56])
         self.init_state = []
         self.reset()
 
@@ -54,13 +54,16 @@ class Maze0522Env(core.Env):
         return [seed]
 
     def _load_data(self, data_directory):
-        filename = 'map0522'
-        self.mazeData = np.loadtxt(data_directory + '/' + filename + '.csv').astype(int)
-        self.freespaceData = np.loadtxt(data_directory + '/' + filename + '_freespace.csv').astype(int)
+        mapname = 'map0522'
+        filename = 'map0522v1'
+
+        self.mazeData = np.loadtxt(data_directory + '/' + mapname + '.csv').astype(int)
+        self.freespaceData = np.loadtxt(data_directory + '/' + mapname + '_freespace.csv').astype(int)
         self.costData = np.loadtxt(data_directory + '/' + filename + '_costmap.csv').astype(int)
-        self.pgradData = np.loadtxt(data_directory + '/' + filename + '_pgrad.csv').astype(int)
-        self.flowstatsData = np.loadtxt(data_directory + '/' + filename + '_flowstats.csv').astype(float)
-        self.visitData = np.loadtxt(data_directory + '/' + filename + '_visit.csv').astype(float)
+        self.pgradData = np.loadtxt(data_directory + '/' + mapname + '_pgrad.csv').astype(int)
+        self.flowstatsData = np.loadtxt(data_directory + '/' + mapname + '_flowstats.csv').astype(float)
+        self.visitData = np.loadtxt(data_directory + '/' + mapname + '_visit.csv').astype(float)
+
         self.get_flowmap()
         self.get_flowstats()
 
@@ -68,7 +71,6 @@ class Maze0522Env(core.Env):
     def _build_robot(self):
         self.internal_steps = 0
         self.delivery_rate_thresh = 0.7
-
         # ======================
         # For transfer learning only
         self.tflearn = False
@@ -79,13 +81,12 @@ class Maze0522Env(core.Env):
         self.robot_num = 32  # len(row)
         self.doses = 4
         self.doses_remain = self.doses - 1
-        self.dose_gap = 64
+        self.dose_gap = 36
         self.robot_num_orig = np.copy(self.robot_num)
         self.robot_num_prev = np.copy(self.robot_num)
         probs = self.visitData[row, col] / np.sum(self.visitData[row, col])
         self.robot = np.random.choice(row.shape[0], self.robot_num, p=probs)
         # self.robot = random.sample(range(row.shape[0]), self.robot_num)
-
         self.state = np.zeros(np.shape(self.mazeData)).astype(int)
         self.state_img = np.copy(self.state)
         self.loc = np.zeros([self.robot_num, 2]).astype(np.int32)
@@ -414,7 +415,7 @@ def main(MazeEnv):
         rewards += reward
         env.render()
         print('Step = %d, delivery_rate = %.2f, rewards = %.1f, reward = %.1f, done = %d' % (steps, env.delivery_rate, rewards, reward, done))
-        if steps % 320 == 0:
+        if steps % 220 == 0:
             done = True
 
         if done:
@@ -428,6 +429,6 @@ def main(MazeEnv):
 
 
 if __name__ == '__main__':
-    main(Maze0522Env)
+    main(Maze0522Env3)
 
 
