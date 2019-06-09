@@ -40,13 +40,14 @@ class Maze0523Env(core.Env):
                                (-1, 0): 4, (-1, -1): 5, (0, -1): 6, (1, -1): 7, (0, 0): 8}
         self.n_actions = len(self.actions)
         self.action_space = spaces.Discrete(self.n_actions)
+        self.goal = np.array([37, 36])
+
         self._load_data(self.map_data_dir)
         mazeHeight, mazeWidth = self.mazeData.shape
         self.observation_space = spaces.Box(low=0, high=255, shape=(mazeHeight, mazeWidth, 1), dtype=np.uint8)
         self.seed()
         self.maze = 1.0 - self.mazeData
         self.freespace = 1.0 - self.freespaceData
-        self.goal = np.array([36, 35])
         self.init_state = []
         self.reset()
 
@@ -62,9 +63,12 @@ class Maze0523Env(core.Env):
         self.pgradData = np.loadtxt(data_directory + '/' + filename + '_pgrad.csv').astype(int)
         self.flowstatsData = np.loadtxt(data_directory + '/' + filename + '_flowstats.csv').astype(float)
         self.visitData = np.loadtxt(data_directory + '/' + filename + '_visit.csv').astype(float)
+        self.endpt_brch_map = np.loadtxt(data_directory + '/' + filename + '_endpt_brch_map.csv').astype(int)
+        self.detection_patch = np.loadtxt(data_directory + '/' + filename + '_detect_patch.csv').astype(int)
+        self.endpt_brch_control_map = np.loadtxt(data_directory + '/' + filename + '_endpt_brch_control_map.csv').astype(int)
         self.get_flowmap()
         self.get_flowstats()
-
+        self._init_control()
 
     def _build_robot(self):
         self.internal_steps = 0
@@ -98,6 +102,40 @@ class Maze0523Env(core.Env):
         self.init_state_img = self.state_img
         self.output_img = self.state_img + self.maze * 255
         return (np.expand_dims(self.output_img, axis=2))
+
+    def _init_control(self):
+
+        """
+            self.endpt_brch_map: [endpt_row, endpt_col, len(brchs), \
+            brchs1_row, brch1_col, brchs2_row, brch2_col, ... ]
+
+            self.endpt_brch_control_map: [endpt_row, endpt_col, len(brchs), \
+            dir1_row, dir1_col, dir2_row, dir2_col, ... ]
+
+            self.detection_patch: [brch_row, brch_col, #(pixel in patch), \
+            tl_row, br_row, tl_col, br_col, rows, cols]
+
+        """
+        res = np.sum(self.goal - self.endpt_brch_map[:,:2], axis=1)
+        idx = np.squeeze(np.where(res == 0)[0])
+        brch_size = int(self.endpt_brch_map[idx, 2])
+        self.brch = np.reshape(self.endpt_brch_map[idx, 3:3+2*brch_size], [-1,2])
+        self.brch_weights = np.ones(brch_size, dtype = np.float)
+        # for i in range(brch_size):
+        #     self.brch_weights[i] = (brch_size-i)/2.0
+        self.brch_ctrl = np.reshape(self.endpt_brch_control_map[idx, 3:3+2*brch_size], [-1,2])
+        patch_height = 1+np.max(self.detection_patch[:, 4] - self.detection_patch[:, 3])
+        patch_width = 1+np.max(self.detection_patch[:, 6] - self.detection_patch[:, 5])
+        self.patch = np.zeros([patch_height, patch_width, brch_size], dtype=np.int)
+        self.tlpt = np.zeros([brch_size, 2], dtype=np.int)
+        for i in range(brch_size):
+            idx = np.where(self.brch[i,:]- self.detection_patch[:,:2] == [0, 0])[0][0]
+            num_pix = self.detection_patch[idx, 2]
+            rows, cols = self.detection_patch[idx, 7:num_pix], self.detection_patch[idx, 7+num_pix:7+2*num_pix]
+            tl_row, tl_col = self.detection_patch[idx, 3], self.detection_patch[idx, 5]
+            self.tlpt[i,:] = [tl_row, tl_col]
+            for row, col in zip(rows, cols):
+                self.patch[row-tl_row,col-tl_col,i] = 1
 
     def get_costmap(self):
         return (np.expand_dims(self.costData, axis=2))
@@ -201,7 +239,7 @@ class Maze0523Env(core.Env):
 
         self.loc = np.append(self.loc, loc, axis=0)
 
-    def step(self, action):
+    def _step(self, action):
         info = {}
         self.internal_steps += 1
         if self.doses_remain>0 and (self.internal_steps % self.dose_gap == 1) and self.internal_steps>1:
@@ -221,7 +259,7 @@ class Maze0523Env(core.Env):
         self.output_img = self.state_img + self.maze * 255
         return (np.expand_dims(self.output_img, axis=2), reward, done, info)
 
-    def _step(self, action):
+    def step(self, action):
 
         info = {}
         self.internal_steps += 1
@@ -341,92 +379,88 @@ class Maze0523Env(core.Env):
     def reset(self):
         return self._build_robot()
 
-    def transfer_learning(self):
-        if not self.tflearn:
-            self.tflearn = True
-            self.cur_robot = np.argmax(self.costData[self.loc[:, 0], self.loc[:, 1]])
+    def expert(self):
+        patch_height, patch_width, patch_depth = self.patch.shape
 
-    def instructor(self):
+        action_weights = np.ones(patch_depth)
 
-        _cost_to_goal = self.costData[self.loc[self.cur_robot, 0], self.loc[self.cur_robot, 1]]
-        if _cost_to_goal < 5:
-            self.cur_robot = np.argmax(self.costData[self.loc[:, 0], self.loc[:, 1]])
-            _cost_to_goal = self.costData[self.loc[self.cur_robot, 0], self.loc[self.cur_robot, 1]]
-
-        for i in range(-1, 2):
-            for j in range(-1, 2):
-                if not (i == 0 and j == 0):
-                    new_pt = self.loc[self.cur_robot, :] + np.array([i, j]).astype(int)
-                    new_cost = self.costData[new_pt[0], new_pt[1]]
-                    if new_cost > 0 and new_cost < _cost_to_goal:
-                        action = self.rev_action_map.get((i, j))
-                        _cost_to_goal = np.copy(new_cost)
-
+        for i in range(self.brch.shape[0]):
+            action_weights[i] = self.brch_weights[i]* np.sum(np.multiply(self.patch[:,:,i],
+                                      self.state_img[self.tlpt[i,0]:self.tlpt[i,0]+patch_height,
+                                      self.tlpt[i,1]:self.tlpt[i,1]+patch_width]))/self.robot_marker
+        # print( np.exp(action_weights)/sum(np.exp(action_weights)))
+        selected_brch = np.argmax(action_weights)
+        if action_weights[selected_brch] == 0:
+            action = self.rev_action_map[(0, 0)]
+        else:
+            dir = (self.brch_ctrl[selected_brch][0],self.brch_ctrl[selected_brch][1])
+            action = self.rev_action_map[dir]
         return action
 
-    def expert(self, robot_id):
 
-        done, _ = self.get_reward()
-        if robot_id is None or done or robot_id >= self.loc.shape[0]:
-            return self.expert_restart_session()
+def _main(MazeEnv):
+    env = MazeEnv()
+    env.render()
+    episode = 10
+    steps = 0
+    import time
+    start = time.time()
+    weight_dict = [1,2,6]
+    for wi in weight_dict:
+        for wj in weight_dict:
+            for wk in weight_dict:
+                env.brch_weights = [wi,wj,wk]
+                print('weights==', env.brch_weights)
+                delivery = []
+                steps = 0
+                for i in range(episode):
+                    done = False
+                    while not done:
+                        # if i % 200 == 0:
+                        #     now = time.time()
+                        #     print('step {} time elapse {}'.format(i, now - start))
+                        #     start = now
+                        steps += 1
+                        next_action = env.expert()
+                        _, _, done, _ =env._step(next_action)
+                        # env.render()
+                        # print('Step = %d, delivery_rate = %.2f, rewards = %.1f, reward = %.1f, done = %d' % (steps, env.delivery_rate, rewards, reward, done))
+                        if steps>0 and steps % 300 == 0:
+                            delivery.append(env.delivery_rate)
+                            done = True
 
-        _cost_to_goal = self.costData[self.loc[robot_id, 0], self.loc[robot_id, 1]]
-        if _cost_to_goal > 1:
-
-            for i in range(-1, 2):
-                for j in range(-1, 2):
-                    if not (i == 0 and j == 0):
-                        new_pt = self.loc[robot_id, :] + np.array([i, j]).astype(int)
-                        new_cost = self.costData[new_pt[0], new_pt[1]]
-                        if new_cost > 0 and new_cost < _cost_to_goal:
-                            action = self.rev_action_map.get((i, j))
-                            _cost_to_goal = np.copy(new_cost)
-
-            return action, robot_id
-
-        else:
-            return self.expert_restart_session()
-
-    def expert_restart_session(self):
-        done, _ = self.get_reward()
-        if done:
-            self.reset()
-        robot_id = np.argmax(self.costData[self.loc[:, 0], self.loc[:, 1]])
-        return self.expert(robot_id)
-
+                        if done:
+                            steps = 0
+                            env.reset()
+                print('deli mean = ', np.mean(delivery), 'deli std = ', np.std(delivery))
 
 def main(MazeEnv):
     env = MazeEnv()
     env.render()
-    plt.pause(2)
-    n_epochs = 10000
-    robot_id = None
+    episode = 10
     steps = 0
-    rewards = 0.0
     import time
     start = time.time()
-    for i in range(n_epochs):
-        if i % 200 == 0:
-            now = time.time()
-            print('step {} time elapse {}'.format(i, now - start))
-            start = now
+
+    env.brch_weights = [1, 2, 1]
+    print('weights==', env.brch_weights)
+    steps = 0
+    while 1:
+        # if i % 200 == 0:
+        #     now = time.time()
+        #     print('step {} time elapse {}'.format(i, now - start))
+        #     start = now
         steps += 1
-        # next_action = np.random.randint(4,size = 1)
-        next_action, robot_id = env.expert(robot_id)
-        state_img, reward, done, _ = env.step(next_action)
-        rewards += reward
+        next_action = env.expert()
+        _, _, done, _ =env.step(next_action)
         env.render()
-        print('Step = %d, delivery_rate = %.2f, rewards = %.1f, reward = %.1f, done = %d' % (steps, env.delivery_rate, rewards, reward, done))
-        if steps % 300 == 0:
+        # print('Step = %d, delivery_rate = %.2f, rewards = %.1f, reward = %.1f, done = %d' % (steps, env.delivery_rate, rewards, reward, done))
+        if steps>0 and steps % 300 == 0:
+            print(env.delivery_rate)
             done = True
 
         if done:
-            print('\n')
-
-        if done:
             steps = 0
-            rewards = 0.0
-            plt.pause(2)
             env.reset()
 
 

@@ -406,7 +406,7 @@ def main(MazeEnv):
     steps = 0
     import time
     start = time.time()
-    weight_dict = [1,2,6,8]
+    weight_dict = [1,2,4,8]
     for wi in weight_dict:
         for wj in weight_dict:
             for wk in weight_dict:
