@@ -401,7 +401,7 @@ class Maze0522Env1Auto(core.Env):
 
 def main(MazeEnv):
     env = MazeEnv()
-    env.render()
+    # env.render()
     episode = 10
     steps = 0
     import time
