@@ -121,6 +121,7 @@ class Maze0522Env1Auto(core.Env):
         res = np.sum(self.goal - self.endpt_brch_map[:, :2], axis=1)
         idx = np.squeeze(np.where(res == 0)[0])
         brch_size = int(self.endpt_brch_map[idx, 2])
+        print(brch_size)
         self.brch = np.reshape(self.endpt_brch_map[idx, 3:3 + 2 * brch_size], [-1, 2])
         self.brch_weights = np.ones(brch_size, dtype=np.float)
         # for i in range(brch_size):
@@ -411,7 +412,7 @@ def main(MazeEnv):
         for wj in weight_dict:
             for wk in weight_dict:
                 for wm in weight_dict:
-                    env.brch_weights = [wi,wj,wk]
+                    env.brch_weights = [wi,wj,wk, wm]
 
                     delivery = []
                     steps = 0

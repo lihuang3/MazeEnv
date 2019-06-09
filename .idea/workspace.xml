@@ -40,8 +40,8 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/my_games/Maze0522Env1Auto.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="46">
-                  <caret line="404" column="14" selection-start-line="404" selection-start-column="14" selection-end-line="404" selection-end-column="14" />
+                <state relative-caret-position="254">
+                  <caret line="414" column="53" lean-forward="true" selection-start-line="414" selection-start-column="53" selection-end-line="414" selection-end-column="53" />
                 </state>
               </provider>
             </entry>
@@ -224,7 +224,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.MLB2Map4">
+  <component name="RunManager" selected="Python.Maze0522Env1Auto">
     <configuration name="MLB2Map4" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="MazeEnv" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -339,8 +339,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.MLB2Map4" />
         <item itemvalue="Python.Maze0522Env1Auto" />
+        <item itemvalue="Python.MLB2Map4" />
         <item itemvalue="Python.Maze0522EnvAuto" />
         <item itemvalue="Python.Maze0522Env2" />
         <item itemvalue="Python.Maze0522Env5" />
@@ -431,6 +431,11 @@
           <line>87</line>
           <option name="timeStamp" value="19" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/my_games/Maze0522Env1Auto.py</url>
+          <line>388</line>
+          <option name="timeStamp" value="20" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
     <watches-manager>
@@ -443,6 +448,18 @@
   </component>
   <component name="debuggerHistoryManager">
     <expressions id="evaluateCodeFragment">
+      <expression>
+        <expression-string>np.ones(brch_size, dtype=np.float)</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>res = np.sum(self.goal - self.endpt_brch_map[:, :2], axis=1)         
+idx = np.squeeze(np.where(res == 0)[0])         
+brch_size = int(self.endpt_brch_map[idx, 2])</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
+      </expression>
       <expression>
         <expression-string>action_weights[i] = self.brch_weights[i] * np.sum(np.multiply(self.patch[:, :, i],
                               self.state_img[self.tlpt[i, 0]:self.tlpt[i, 0] + patch_height,
@@ -492,13 +509,28 @@
         <language-id>Python</language-id>
         <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
       </expression>
-      <expression>
-        <expression-string>patch_depth</expression-string>
-        <language-id>Python</language-id>
-        <evaluation-mode>CODE_FRAGMENT</evaluation-mode>
-      </expression>
     </expressions>
     <expressions id="evaluateExpression">
+      <expression>
+        <expression-string>res = np.sum(self.goal - self.endpt_brch_map[:, :2], axis=1)         idx = np.squeeze(np.where(res == 0)[0])         brch_size = int(self.endpt_brch_map[idx, 2])</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>self.brch</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>self.endpt_brch_map[idx,2]</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>self.endpt_brch_map</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
       <expression>
         <expression-string>np.sum(np.multiply(self.patch[:,:,i],                                       self.state_img[self.tlpt[i,0]:self.tlpt[i,0]+patch_height,                                       self.tlpt[i,1]:self.tlpt[i,1]+patch_width]))</expression-string>
         <language-id>Python</language-id>
@@ -521,26 +553,6 @@
       </expression>
       <expression>
         <expression-string>self.patch[:,:,i]</expression-string>
-        <language-id>Python</language-id>
-        <evaluation-mode>EXPRESSION</evaluation-mode>
-      </expression>
-      <expression>
-        <expression-string>[self.patch[:,:,i], self.state_img[self.tlpt[i,0]:self.tlpt[i,0]+patch_height,self.tlpt[i,1]:self.tlpt[i,1]+patch_width]]</expression-string>
-        <language-id>Python</language-id>
-        <evaluation-mode>EXPRESSION</evaluation-mode>
-      </expression>
-      <expression>
-        <expression-string>action_weight[i] = self.brch_weight[i]*np.dot(self.patch[:,:,i], self.state_img[self.tlpt[i,0]:self.tlpt[i,0]+patch_height,self.tlpt[i,1]:self.tlpt[i,1]+patch_width])</expression-string>
-        <language-id>Python</language-id>
-        <evaluation-mode>EXPRESSION</evaluation-mode>
-      </expression>
-      <expression>
-        <expression-string>self.patch.shape</expression-string>
-        <language-id>Python</language-id>
-        <evaluation-mode>EXPRESSION</evaluation-mode>
-      </expression>
-      <expression>
-        <expression-string>patch_height, patch_width, patch_depth = self.patch.shape</expression-string>
         <language-id>Python</language-id>
         <evaluation-mode>EXPRESSION</evaluation-mode>
       </expression>
@@ -884,8 +896,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/my_games/Maze0522Env1Auto.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="46">
-          <caret line="404" column="14" selection-start-line="404" selection-start-column="14" selection-end-line="404" selection-end-column="14" />
+        <state relative-caret-position="254">
+          <caret line="414" column="53" lean-forward="true" selection-start-line="414" selection-start-column="53" selection-end-line="414" selection-end-column="53" />
         </state>
       </provider>
     </entry>
