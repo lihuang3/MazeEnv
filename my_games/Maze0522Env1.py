@@ -458,7 +458,7 @@ def _main(MazeEnv, args):
         recvbuf = np.reshape(recvbuf, [-1, brch_size+2])
         assert(recvbuf.min()>0)
         sorted_res = recvbuf[recvbuf[:,0].argsort()]
-        print(sorted_res[-16:,:])
+        print(sorted_res[-32:,:])
         weight_dir = os.path.abspath('./weights')
         filename = args.env + '_weights_candate.csv'
         np.savetxt(os.path.join(weight_dir, filename), sorted_res[-32:,2:], fmt='%3i')

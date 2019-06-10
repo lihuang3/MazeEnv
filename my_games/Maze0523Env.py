@@ -457,7 +457,7 @@ def _main(MazeEnv, args):
         recvbuf = np.reshape(recvbuf, [-1, brch_size+2])
         assert(recvbuf.min()>0)
         sorted_res = recvbuf[recvbuf[:,0].argsort()]
-        print(sorted_res[-16:,:])
+        print(sorted_res[-32:,:])
         weight_dir = os.path.abspath('./weights')
         filename = args.env + '_weights_candate.csv'
         np.savetxt(os.path.join(weight_dir, filename), sorted_res[-32:,2:], fmt='%3i')
@@ -559,11 +559,12 @@ if __name__ == '__main__':
     # [1, 1, 2, 8], [1, 1, 8, 4], [1, 1, 8, 8]
     args = parser.parse_args()
 
+    maze = Maze0523Env
     if args.mode == 'test':
-        main(Maze0523Env, args)
+        main(maze, args)
     elif args.mode == 'train':
-        _main(Maze0523Env, args)
+        _main(maze, args)
     elif args.mode == 'fitu':
-        finetune(Maze0523Env, args)
+        finetune(maze, args)
     else:
         raise NotImplementedError
