@@ -417,13 +417,14 @@ def _main(MazeEnv):
 
     # if MPI.COMM_WORLD.Get_size() > 1:
     num_workers = MPI.COMM_WORLD.Get_size()
+    assert num_workers % len(weights_set)
     my_rank = int(MPI.COMM_WORLD.Get_rank())
     my_portion = int(len(weights_set) / num_workers)
     weights_set = weights_set[ my_rank*my_portion:(my_rank+1)*my_portion ]
-    sendbuf = np.zeros([my_portion, brch_size+1])
+    sendbuf = np.zeros([my_portion, brch_size+2])
     recvbuf = None
     if my_rank == 0:
-        recvbuf = np.empty([len(weights_set), brch_size+1], dtype=np.float)
+        recvbuf = np.empty([num_workers, my_portion, brch_size+2], dtype=np.float)
     start = time.time()
     for cnt, env.brch_weights in enumerate(weights_set):
         delivery = []
@@ -445,12 +446,15 @@ def _main(MazeEnv):
                     env.reset()
         mean = 100.0 * np.mean(delivery)
         std = 100.0 * np.std(delivery)
+        sendbuf[2:] = [mean, std]
+        sendbuf[2:] = env.brch_weights
         time_left = str(datetime.timedelta(seconds=(time.time() - start) * (len(weights_set) - cnt - 1) / (cnt + 1) ))
         print('%d/%d'%(1+cnt, len(weights_set)), 'worker_%d'%(my_rank), 'time left:', time_left[:-7], 'weights=',env.brch_weights, ' deli mean=%.2f'%(mean), '% ', ' deli std=%.2f'%(std),'%')
         sys.stdout.flush()
 
     MPI.COMM_WORLD.Gather(sendbuf, recvbuf, root=0)
     if my_rank == 0:
+        recvbuf = np.reshape(recvbuf, [-1, brch_size+2])
         sorted_res = recvbuf[recvbuf[:,0].argsort()]
         print(sorted_res[-32:,:])
 
