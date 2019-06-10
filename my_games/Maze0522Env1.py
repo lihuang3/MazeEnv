@@ -446,8 +446,8 @@ def _main(MazeEnv):
                     env.reset()
         mean = 100.0 * np.mean(delivery)
         std = 100.0 * np.std(delivery)
-        sendbuf[2:] = [mean, std]
-        sendbuf[2:] = env.brch_weights
+        sendbuf[cnt, 2:] = [mean, std]
+        sendbuf[cnt, 2:] = env.brch_weights
         time_left = str(datetime.timedelta(seconds=(time.time() - start) * (len(weights_set) - cnt - 1) / (cnt + 1) ))
         print('%d/%d'%(1+cnt, len(weights_set)), 'worker_%d'%(my_rank), 'time left:', time_left[:-7], 'weights=',env.brch_weights, ' deli mean=%.2f'%(mean), '% ', ' deli std=%.2f'%(std),'%')
         sys.stdout.flush()
