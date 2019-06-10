@@ -398,11 +398,12 @@ def DFS(weights, cur_brch, weight_dict, weights_set):
         DFS(weights, cur_brch+1, weight_dict, weights_set)
 
 
-def _main(MazeEnv):
+def _main(MazeEnv, args):
     import datetime
     from mpi4py import MPI
 
     env = MazeEnv()
+
     # env.render()
     episode = 10
     steps = 0
@@ -416,10 +417,14 @@ def _main(MazeEnv):
 
     # if MPI.COMM_WORLD.Get_size() > 1:
     num_workers = MPI.COMM_WORLD.Get_size()
+    assert num_workers % len(weights_set)
     my_rank = int(MPI.COMM_WORLD.Get_rank())
     my_portion = int(len(weights_set) / num_workers)
     weights_set = weights_set[ my_rank*my_portion:(my_rank+1)*my_portion ]
-
+    sendbuf = -1.0 * np.ones([my_portion, brch_size+2])
+    recvbuf = None
+    if my_rank == 0:
+        recvbuf = np.empty([num_workers, my_portion, brch_size+2], dtype=np.float)
     start = time.time()
     for cnt, env.brch_weights in enumerate(weights_set):
         delivery = []
@@ -431,7 +436,7 @@ def _main(MazeEnv):
                 next_action = env.expert()
                 _, reward, done, _ = env.step(next_action)
                 rewards += reward
-                if steps > 0 and steps % 290 == 0:
+                if steps > 0 and steps % args.nsteps == 0:
                     delivery.append(env.delivery_rate)
                     done = True
 
@@ -441,46 +446,99 @@ def _main(MazeEnv):
                     env.reset()
         mean = 100.0 * np.mean(delivery)
         std = 100.0 * np.std(delivery)
-
+        sendbuf[cnt, :2] = [mean, std]
+        sendbuf[cnt, 2:] = env.brch_weights
         time_left = str(datetime.timedelta(seconds=(time.time() - start) * (len(weights_set) - cnt - 1) / (cnt + 1) ))
         print('%d/%d'%(1+cnt, len(weights_set)), 'worker_%d'%(my_rank), 'time left:', time_left[:-7], 'weights=',env.brch_weights, ' deli mean=%.2f'%(mean), '% ', ' deli std=%.2f'%(std),'%')
         sys.stdout.flush()
 
-def main(MazeEnv):
+    MPI.COMM_WORLD.Gather(sendbuf, recvbuf, root=0)
+    if my_rank == 0:
+        recvbuf = np.reshape(recvbuf, [-1, brch_size+2])
+        assert(recvbuf.min()>0)
+        sorted_res = recvbuf[recvbuf[:,0].argsort()]
+        print(sorted_res[-16:,:])
+        weight_dir = os.path.abspath('./weights')
+        filename = args.env + '_weights_candate.csv'
+        np.savetxt(os.path.join(weight_dir, filename), sorted_res[-32:,2:], fmt='%3i')
+
+def finetune(MazeEnv, args):
+    import datetime
+    from mpi4py import MPI
+
+    env = MazeEnv()
+
+    weight_dir = os.path.abspath('./weights')
+    filename = args.env + '_weights_candate.csv'
+    weights_set = np.loadtxt(os.path.join(weight_dir, filename)).astype(int)
+    episode = 32
+    steps = 0
+    rewards = 0
+    import time
+    brch_size = env.brch_weights.shape[0]
+
+    num_workers = MPI.COMM_WORLD.Get_size()
+    assert weights_set.shape[0] % num_workers == 0
+    my_rank = int(MPI.COMM_WORLD.Get_rank())
+    my_portion = int(weights_set.shape[0] / num_workers)
+    weights_set = weights_set[ my_rank*my_portion:(my_rank+1)*my_portion ]
+    sendbuf = -1.0 * np.ones([my_portion, brch_size+2])
+    recvbuf = None
+    if my_rank == 0:
+        recvbuf = np.empty([num_workers, my_portion, brch_size+2], dtype=np.float)
+    start = time.time()
+    for cnt in range(weights_set.shape[0]):
+        delivery = []
+        steps = 0
+        env.brch_weights = weights_set[cnt, :]
+        for i in range(episode):
+            done = False
+            while not done:
+                steps += 1
+                next_action = env.expert()
+                _, reward, done, _ = env.step(next_action)
+                rewards += reward
+                if steps > 0 and steps % args.nsteps == 0:
+                    delivery.append(env.delivery_rate)
+                    done = True
+
+                if done:
+                    steps = 0
+                    rewards = 0
+                    env.reset()
+        mean = 100.0 * np.mean(delivery)
+        std = 100.0 * np.std(delivery)
+        sendbuf[cnt, :2] = [mean, std]
+        sendbuf[cnt, 2:] = env.brch_weights
+        time_left = str(datetime.timedelta(seconds=(time.time() - start) * (len(weights_set) - cnt - 1) / (cnt + 1) ))
+        print('%d/%d'%(1+cnt, len(weights_set)), 'worker_%d'%(my_rank), 'time left:', time_left[:-7], 'weights=',env.brch_weights, ' deli mean=%.2f'%(mean), '% ', ' deli std=%.2f'%(std),'%')
+        sys.stdout.flush()
+
+    MPI.COMM_WORLD.Gather(sendbuf, recvbuf, root=0)
+    if my_rank == 0:
+        recvbuf = np.reshape(recvbuf, [-1, brch_size+2])
+        assert(recvbuf.min()>0)
+        sorted_res = recvbuf[recvbuf[:,0].argsort()]
+        print(sorted_res)
+
+def main(MazeEnv, args):
     env = MazeEnv()
     env.render()
     steps = 0
     rewards = 0
     import time
     start = time.time()
-    env.brch_weights = [4, 2, 1, 8, 4]
-    # [4, 1, 1,4,1]
-    # [2, 1, 1, 4, 2]
-    # [8, 1, 1, 4, 1]
-    # [8,1,1,4,2]
-    #  [1,1,1,4,2]
-    # [2,1,1,1,4,4]
-    # [4,1,1,4,4]
-    # [1,1,1,8,4]
-    #[8 1 1 8 4]
-    # [8,4,2,8,8]
-    # [1 4 2 8 8]
-    #  [4 2 1 8 4]
-    # [4 2 1 8 8]
+    env.brch_weights = args.weights
 
     steps = 0
     while 1:
-        # if i % 200 == 0:
-        #     now = time.time()
-        #     print('step {} time elapse {}'.format(i, now - start))
-        #     start = now
         steps += 1
         next_action = env.expert()
         _, reward, done, _ = env.step(next_action)
         rewards += reward
         env.render()
         # print('Step = %d, deli = %.2f%, rew = %.2f, done = %d' % (steps, env.delivery_rate, rewards, done))
-        if steps > 0 and steps % 300 == 0:
+        if steps > 0 and steps % args.nsteps == 0:
             print('deli = ', 100.0 * env.delivery_rate, '%', 'rew = %.2f'%(rewards))
             done = True
             time.sleep(2)
@@ -491,6 +549,21 @@ def main(MazeEnv):
 
 
 if __name__ == '__main__':
-    _main(Maze0523Env)
+    import argparse
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
+    parser.add_argument('--mode', type=str, default='test', choices=['train', 'test', 'fitu'])
+    parser.add_argument('--env', type=str, default='Maze0523Env')
+    parser.add_argument('--nsteps', type=int, default=290)
+    parser.add_argument('--weights', type=list, default=[4, 2, 1, 8, 4])
+    # [1, 1, 2, 8], [1, 1, 8, 4], [1, 1, 8, 8]
+    args = parser.parse_args()
 
+    if args.mode == 'test':
+        main(Maze0523Env, args)
+    elif args.mode == 'train':
+        _main(Maze0523Env, args)
+    elif args.mode == 'fitu':
+        finetune(Maze0523Env, args)
+    else:
+        raise NotImplementedError
