@@ -4,8 +4,8 @@ from skimage.morphology import skeletonize_3d as skel_3d
 import random, skimage
 ROOT_PATH = os.path.abspath('./MapData')
 
-mapfile = 'map0523'
-filename = 'map0523'
+mapfile = 'map0524'
+filename = 'map0524'
 
 # Load hand-craft binary maze
 
@@ -32,8 +32,13 @@ skel = np.asarray(skel_3d(mazeData), dtype=int)
 # start = [26, 186]
 
 ## For Map 523
-skel[73, 181:186] = 1
-start = [73, 186]
+# skel[73, 181:186] = 1
+# start = [73, 186]
+
+## For map 0524
+for i in range(1,8):
+    skel[170+i, 322+i] = 1
+start = [177, 329]
 
 plt.imshow(skel + mazeData)
 plt.show()
@@ -49,7 +54,7 @@ costMap = np.copy(mazeData)
 pgrad = np.copy(mazeData)
 flowMapCol = 0 * mazeData
 flowMapRow = 0 * mazeData
-goal = [61, 56]
+goal = [52, 69]
 
 ## for map0522
 # v0 [158, 18]
@@ -58,6 +63,10 @@ goal = [61, 56]
 ## For map0523
 # v0 [61, 56]
 # v1 [37, 36]
+
+## For map0524
+# v0 [52, 69]
+# v1 [278, 64]
 
 BSF_Frontier = []
 BSF_Frontier.append(goal)
@@ -218,7 +227,7 @@ Distribute robots in endpoints
 """
 ##++++++++++++++++++++++++++++++++++++++++++++
 
-num_robot = 512
+num_robot = 1024
 
 endpoint = outlet_Frontier
 loc = np.zeros([num_robot, 2], dtype = np.int32)
