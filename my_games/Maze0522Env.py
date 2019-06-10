@@ -399,51 +399,52 @@ def DFS(weights, cur_brch, weight_dict, weights_set):
         DFS(weights, cur_brch + 1, weight_dict, weights_set)
 
 def _main(MazeEnv):
+    import datetime
     env = MazeEnv()
     # env.render()
-    episode = 2
+    episode = 10
     steps = 0
+    rewards = 0
     import time
-    start = time.time()
     weight_dict = [1, 2, 4, 8]
     brch_size = env.brch_weights.shape[0]
     weights = [1] * brch_size
     weights_set = []
     DFS(weights=weights, cur_brch=0, weight_dict=weight_dict, weights_set=weights_set)
 
-    for env.brch_weights in weights_set:
+    start = time.time()
+    for cnt, env.brch_weights in enumerate(weights_set):
         delivery = []
         steps = 0
         for i in range(episode):
             done = False
             while not done:
-                # if i % 200 == 0:
-                #     now = time.time()
-                #     print('step {} time elapse {}'.format(i, now - start))
-                #     start = now
                 steps += 1
                 next_action = env.expert()
-                _, _, done, _ = env.step(next_action)
-                # env.render()
-                # print('Step = %d, delivery_rate = %.2f, rewards = %.1f, reward = %.1f, done = %d' % (steps, env.delivery_rate, rewards, reward, done))
+                _, reward, done, _ = env.step(next_action)
+                rewards += reward
                 if steps > 0 and steps % 300 == 0:
                     delivery.append(env.delivery_rate)
                     done = True
 
                 if done:
                     steps = 0
+                    rewards = 0
                     env.reset()
         mean = 100.0 * np.mean(delivery)
         std = 100.0 * np.std(delivery)
-        print('weights= ', env.brch_weights, ' deli mean = ', mean, '% ', ' deli std = ', std)
+
+        time_left = str(datetime.timedelta(seconds=(time.time() - start) * (len(weights_set) - cnt - 1) / (cnt + 1) ))
+        print('%d/%d'%(1+cnt, len(weights_set)), 'time left:', time_left[:-7], 'weights = ', env.brch_weights, ' deli mean = %.2f'%(mean), '% ', ' deli std = %.2f'%(std),'%')
 
 def main(MazeEnv):
     env = MazeEnv()
     env.render()
     steps = 0
+    rewards = 0
     import time
     start = time.time()
-    env.brch_weights = [1, 1, 1]
+    env.brch_weights = [1, 4, 1]
     steps = 0
     while 1:
         # if i % 200 == 0:
@@ -452,15 +453,17 @@ def main(MazeEnv):
         #     start = now
         steps += 1
         next_action = env.expert()
-        _, _, done, _ = env.step(next_action)
+        _, reward, done, _ = env.step(next_action)
+        rewards += reward
         env.render()
-        print('Step = %d, delivery_rate = %.2f, done = %d' % (steps, env.delivery_rate, done))
+        # print('Step = %d, deli = %.2f%, rew = %.2f, done = %d' % (steps, env.delivery_rate, rewards, done))
         if steps > 0 and steps % 300 == 0:
-            print(100.0 * env.delivery_rate, '%')
+            print('deli = ', 100.0 * env.delivery_rate, '%', 'rew = %.2f'%(rewards))
             done = True
             time.sleep(2)
         if done:
             steps = 0
+            rewards = 0
             env.reset()
 
 if __name__ == '__main__':

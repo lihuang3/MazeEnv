@@ -72,7 +72,7 @@ class Maze0523Env4(core.Env):
 
     def _build_robot(self):
         self.internal_steps = 0
-        self.delivery_rate_thresh = 0.55
+        self.delivery_rate_thresh = 0.0
 
         # ======================
         # For transfer learning only
