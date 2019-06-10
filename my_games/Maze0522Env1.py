@@ -410,7 +410,7 @@ def _main(MazeEnv):
     rewards = 0
     import time
     weight_dict = [1, 2, 4, 8]
-    brch_size = env.brch_weights.shape[0].astype(int)
+    brch_size = env.brch_weights.shape[0]
     weights = [1] * brch_size
     weights_set = []
     DFS(weights=weights, cur_brch=0, weight_dict=weight_dict, weights_set=weights_set)
