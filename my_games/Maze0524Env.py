@@ -1,5 +1,5 @@
 """
-  gym id: Maze0522Env-v1
+  gym id: Maze0524Env-v0
   Input: gray-scale images
   Reward: region range basis (easy)
   Render: gray-scale visualization
@@ -20,7 +20,7 @@ from time import sleep
 plt.ion()
 
 
-class Maze0522Env1(core.Env):
+class Maze0524Env(core.Env):
     def __init__(self):
 
         dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -40,7 +40,8 @@ class Maze0522Env1(core.Env):
                                (-1, 0): 4, (-1, -1): 5, (0, -1): 6, (1, -1): 7, (0, 0): 8}
         self.n_actions = len(self.actions)
         self.action_space = spaces.Discrete(self.n_actions)
-        self.goal = np.array([22, 56])
+        self.goal = np.array([52, 69])
+
         self._load_data(self.map_data_dir)
         mazeHeight, mazeWidth = self.mazeData.shape
         self.observation_space = spaces.Box(low=0, high=255, shape=(mazeHeight, mazeWidth, 1), dtype=np.uint8)
@@ -55,27 +56,24 @@ class Maze0522Env1(core.Env):
         return [seed]
 
     def _load_data(self, data_directory):
-        mapname = 'map0522'
-        filename = 'map0522v1'
-
-        self.mazeData = np.loadtxt(data_directory + '/' + mapname + '.csv').astype(int)
-        self.freespaceData = np.loadtxt(data_directory + '/' + mapname + '_freespace.csv').astype(int)
+        filename = 'map0524'
+        self.mazeData = np.loadtxt(data_directory + '/' + filename + '.csv').astype(int)
+        self.freespaceData = np.loadtxt(data_directory + '/' + filename + '_freespace.csv').astype(int)
         self.costData = np.loadtxt(data_directory + '/' + filename + '_costmap.csv').astype(int)
-        self.pgradData = np.loadtxt(data_directory + '/' + mapname + '_pgrad.csv').astype(int)
-        self.flowstatsData = np.loadtxt(data_directory + '/' + mapname + '_flowstats.csv').astype(float)
-        self.visitData = np.loadtxt(data_directory + '/' + mapname + '_visit.csv').astype(float)
-        self.endpt_brch_map = np.loadtxt(data_directory + '/' + mapname + '_endpt_brch_map.csv').astype(int)
-        self.detection_patch = np.loadtxt(data_directory + '/' + mapname + '_detect_patch.csv').astype(int)
-        self.endpt_brch_control_map = np.loadtxt(data_directory + '/' + mapname + '_endpt_brch_control_map.csv').astype(int)
-
+        self.pgradData = np.loadtxt(data_directory + '/' + filename + '_pgrad.csv').astype(int)
+        self.flowstatsData = np.loadtxt(data_directory + '/' + filename + '_flowstats.csv').astype(float)
+        self.visitData = np.loadtxt(data_directory + '/' + filename + '_visit.csv').astype(float)
+        self.endpt_brch_map = np.loadtxt(data_directory + '/' + filename + '_endpt_brch_map.csv').astype(int)
+        self.detection_patch = np.loadtxt(data_directory + '/' + filename + '_detect_patch.csv').astype(int)
+        self.endpt_brch_control_map = np.loadtxt(data_directory + '/' + filename + '_endpt_brch_control_map.csv').astype(int)
         self.get_flowmap()
         self.get_flowstats()
         self._init_control()
 
-
     def _build_robot(self):
         self.internal_steps = 0
         self.delivery_rate_thresh = 0.0
+
         # ======================
         # For transfer learning only
         self.tflearn = False
@@ -83,15 +81,16 @@ class Maze0522Env1(core.Env):
         # ======================
         row, col = np.where(np.logical_and(self.pgradData<=self.init_range, self.pgradData>0 ))
         self.reward_grad = np.zeros(40).astype(np.uint8)
-        self.robot_num = 32  # len(row)
+        self.robot_num = 64  # len(row)
         self.doses = 4
         self.doses_remain = self.doses - 1
-        self.dose_gap = 64
+        self.dose_gap = 100
         self.robot_num_orig = np.copy(self.robot_num)
         self.robot_num_prev = np.copy(self.robot_num)
         probs = self.visitData[row, col] / np.sum(self.visitData[row, col])
         self.robot = np.random.choice(row.shape[0], self.robot_num, p=probs)
         # self.robot = random.sample(range(row.shape[0]), self.robot_num)
+
         self.state = np.zeros(np.shape(self.mazeData)).astype(int)
         self.state_img = np.copy(self.state)
         self.loc = np.zeros([self.robot_num, 2]).astype(np.int32)
@@ -272,13 +271,6 @@ class Maze0522Env1(core.Env):
         for _ in range(3):
             self.flow_step()
 
-        # =====================
-        # Transfer learning
-        if self.tflearn:
-            action = self.instructor()
-            info = {'ac': action}
-        # =====================
-
         dy, dx = self.action_map[action]
 
         prev_loc = np.copy(self.loc)
@@ -318,7 +310,8 @@ class Maze0522Env1(core.Env):
         elif delivery_rate >= 0.025 + self.delivery_rate_thresh:
             reward += 40 * (delivery_rate - self.delivery_rate_thresh)
             self.delivery_rate_thresh = np.copy(delivery_rate)
-
+        # if reward>0:
+        #     print(reward)
         # if delivery_rate >= 0.5  and not self.reward_grad[3]:
         #     self.reward_grad[3] = 1
         #     reward += 4
@@ -366,6 +359,9 @@ class Maze0522Env1(core.Env):
             for j, rgb in enumerate([r, g, b]):
                 rgb_render_image[row[i], col[i], j] = np.uint8(rgb)
 
+        circle = plt.Circle((self.goal[1], self.goal[0]), 10, linestyle='--', color='red', linewidth=1, fill=False)
+        plt.gcf().gca().add_artist(circle)
+
         plt.imshow(rgb_render_image.astype(np.uint8), vmin=0, vmax=255)
         plt.show(False)
         plt.pause(0.0001)
@@ -377,17 +373,15 @@ class Maze0522Env1(core.Env):
         patch_height, patch_width, patch_depth = self.patch.shape
         action_weights = np.ones(patch_depth)
         for i in range(self.brch.shape[0]):
-            action_weights[i] = self.brch_weights[i] * np.sum(np.multiply(self.patch[:, :, i],
-                                                                          self.state_img[self.tlpt[i, 0]:self.tlpt[
-                                                                                                             i, 0] + patch_height,
-                                                                          self.tlpt[i, 1]:self.tlpt[
-                                                                                              i, 1] + patch_width])) / self.robot_marker
+            action_weights[i] = self.brch_weights[i]* np.sum(np.multiply(self.patch[:,:,i],
+                                      self.state_img[self.tlpt[i,0]:self.tlpt[i,0]+patch_height,
+                                      self.tlpt[i,1]:self.tlpt[i,1]+patch_width]))/self.robot_marker
         # print( np.exp(action_weights)/sum(np.exp(action_weights)))
         selected_brch = np.argmax(action_weights)
         if action_weights[selected_brch] == 0:
             action = self.rev_action_map[(0, 0)]
         else:
-            dir = (self.brch_ctrl[selected_brch][0], self.brch_ctrl[selected_brch][1])
+            dir = (self.brch_ctrl[selected_brch][0],self.brch_ctrl[selected_brch][1])
             action = self.rev_action_map[dir]
         return action
 
@@ -397,7 +391,8 @@ def DFS(weights, cur_brch, weight_dict, weights_set):
         return
     for i in range(len(weight_dict)):
         weights[cur_brch] = weight_dict[i]
-        DFS(weights, cur_brch + 1, weight_dict, weights_set)
+        DFS(weights, cur_brch+1, weight_dict, weights_set)
+
 
 def _main(MazeEnv, args):
     import datetime
@@ -554,19 +549,18 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument('--mode', type=str, default='test', choices=['train', 'test', 'fitu'])
-    parser.add_argument('--env', type=str, default='Maze0522Env1')
-    parser.add_argument('--nsteps', type=int, default=280)
-    parser.add_argument('--weights', type=list, default=[1, 1, 8, 8])
-    # [1, 1, 4, 1], [1, 1, 8, 1], [1, 1, 4, 4]
+    parser.add_argument('--env', type=str, default='Maze0524Env')
+    parser.add_argument('--nsteps', type=int, default=460)
+    parser.add_argument('--weights', type=list, default=[1,1, 1, 1, 1])
+
     args = parser.parse_args()
 
+    maze = Maze0524Env
     if args.mode == 'test':
-        main(Maze0522Env1, args)
+        main(maze, args)
     elif args.mode == 'train':
-        _main(Maze0522Env1, args)
+        _main(maze, args)
     elif args.mode == 'fitu':
-        finetune(Maze0522Env1, args)
+        finetune(maze, args)
     else:
         raise NotImplementedError
-
-

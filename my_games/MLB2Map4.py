@@ -36,9 +36,9 @@ skel = np.asarray(skel_3d(mazeData), dtype=int)
 # start = [73, 186]
 
 ## For map 0524
-for i in range(1,8):
-    skel[170+i, 322+i] = 1
-start = [177, 329]
+
+skel[128, 343:353] = 1
+start = [128, 352]
 
 plt.imshow(skel + mazeData)
 plt.show()
@@ -311,7 +311,6 @@ tail_len = 12
 head_len = 12
 
 
-
 for item in brchpt:
     BSF_frontier = [item]
     cost_init = pgradSkel[item[0], item[1]]
@@ -444,8 +443,12 @@ for idx, item in enumerate(endpoint_brchpts_dict):
         # plt.scatter(brchs[i][1], brchs[i][0])
         # plt.show()
 
-endpt_brch_control_map = np.zeros([len(endpoint_brchpts_dict), 40], dtype=np.int16)
-endpt_brch_map = np.zeros([len(endpoint_brchpts_dict), 20], dtype=np.int16)
+"""
+endpt_brch_control_map: [endpt_row, endpt_col, len(brchs), \
+            dir1_row, dir1_col, dir2_row, dir2_col, ... ]
+"""
+endpt_brch_control_map = np.zeros([len(endpoint_brchpts_dict), 100], dtype=np.int16)
+endpt_brch_map = np.zeros([len(endpoint_brchpts_dict), 50], dtype=np.int16)
 
 for idx, item in enumerate(endpoint_brchpts_dict):
     brchs = endpoint_brchpts_dict[item]
@@ -463,23 +466,24 @@ np.savetxt('{}/{}_endpt_brch_control_map.csv'.format(ROOT_PATH, mapfile), endpt_
 
 # Find patches
 detection_map = 0 * mazeData
-detection_patch = np.zeros([len(brchpt), 500], dtype=np.int16)
-thresh1, thresh2 = 1, 6
+detection_patch = np.zeros([len(brchpt), 600], dtype=np.int16)
+thresh1, thresh2 = 2, 8
 for i,brch in enumerate(brchpt):
     tmp_map = 0 * mazeData
     grad = pgrad[brch[0], brch[1]]
-    tmp_map[np.logical_and(pgrad<=grad+thresh1, pgrad>=grad-thresh2)] = 1
+    tmp_map[np.logical_and(pgrad<=grad, pgrad>=grad-thresh2)] = 1
     BSF_Frontier = [brch]
     while len(BSF_Frontier)>0:
         for dir in dir_dict1:
             new_pt = BSF_Frontier[0] + np.array(dir)
-            if pgrad[new_pt[0], new_pt[1]] <=grad+thresh1\
+            if pgrad[new_pt[0], new_pt[1]] <=grad\
                     and pgrad[new_pt[0], new_pt[1]] >=grad-thresh2 \
                     and tmp_map[new_pt[0],new_pt[1]]==1:
                 BSF_Frontier.append(new_pt)
                 tmp_map[new_pt[0],new_pt[1]] = 2
         BSF_Frontier.pop(0)
     tmp_map[tmp_map<2] = 0
+    tmp_map[pgrad>=grad-thresh1] = 0
     # plt.imshow(tmp_map+mazeData)
     # plt.show()
     detection_map += tmp_map
