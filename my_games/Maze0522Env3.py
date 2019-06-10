@@ -105,6 +105,40 @@ class Maze0522Env3(core.Env):
         self.output_img = self.state_img + self.maze * 255
         return (np.expand_dims(self.output_img, axis=2))
 
+    def _init_control(self):
+
+        """
+            self.endpt_brch_map: [endpt_row, endpt_col, len(brchs), \
+            brchs1_row, brch1_col, brchs2_row, brch2_col, ... ]
+
+            self.endpt_brch_control_map: [endpt_row, endpt_col, len(brchs), \
+            dir1_row, dir1_col, dir2_row, dir2_col, ... ]
+
+            self.detection_patch: [brch_row, brch_col, #(pixel in patch), \
+            tl_row, br_row, tl_col, br_col, rows, cols]
+
+        """
+        res = np.sum(self.goal - self.endpt_brch_map[:, :2], axis=1)
+        idx = np.squeeze(np.where(res == 0)[0])
+        brch_size = int(self.endpt_brch_map[idx, 2])
+        self.brch = np.reshape(self.endpt_brch_map[idx, 3:3 + 2 * brch_size], [-1, 2])
+        self.brch_weights = np.ones(brch_size, dtype=np.float)
+        # for i in range(brch_size):
+        #     self.brch_weights[i] = (brch_size-i)/2.0
+        self.brch_ctrl = np.reshape(self.endpt_brch_control_map[idx, 3:3 + 2 * brch_size], [-1, 2])
+        patch_height = 1 + np.max(self.detection_patch[:, 4] - self.detection_patch[:, 3])
+        patch_width = 1 + np.max(self.detection_patch[:, 6] - self.detection_patch[:, 5])
+        self.patch = np.zeros([patch_height, patch_width, brch_size], dtype=np.int)
+        self.tlpt = np.zeros([brch_size, 2], dtype=np.int)
+        for i in range(brch_size):
+            idx = np.where(self.brch[i, :] - self.detection_patch[:, :2] == [0, 0])[0][0]
+            num_pix = self.detection_patch[idx, 2]
+            rows, cols = self.detection_patch[idx, 7:num_pix], self.detection_patch[idx, 7 + num_pix:7 + 2 * num_pix]
+            tl_row, tl_col = self.detection_patch[idx, 3], self.detection_patch[idx, 5]
+            self.tlpt[i, :] = [tl_row, tl_col]
+            for row, col in zip(rows, cols):
+                self.patch[row - tl_row, col - tl_col, i] = 1
+
     def get_costmap(self):
         return (np.expand_dims(self.costData, axis=2))
 
