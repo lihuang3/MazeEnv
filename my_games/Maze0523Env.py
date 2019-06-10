@@ -31,7 +31,7 @@ class Maze0523Env(core.Env):
         self.robot_marker = 150
         self.init_range = 20
         self.goal_range = 10
-        self.delivery_rate_goal = 1.0
+
         self.actions = [0, 1, 2, 3, 4, 5, 6, 7, 8]  # {N, NE, E, SE, S, SW, W, NW}
         # self.action_dict = {0: (-1, 0), 1: (1, 0), 2: (-1, 1), 3: (1, 1)}  # {up, down, left ,right}
         self.action_map = {0: (1, 0), 1: (1, 1), 2: (0, 1), 3: (-1, 1),
@@ -40,7 +40,7 @@ class Maze0523Env(core.Env):
                                (-1, 0): 4, (-1, -1): 5, (0, -1): 6, (1, -1): 7, (0, 0): 8}
         self.n_actions = len(self.actions)
         self.action_space = spaces.Discrete(self.n_actions)
-        self.goal = np.array([37, 36])
+        self.goal = np.array([61, 56])
 
         self._load_data(self.map_data_dir)
         mazeHeight, mazeWidth = self.mazeData.shape
@@ -72,6 +72,7 @@ class Maze0523Env(core.Env):
 
     def _build_robot(self):
         self.internal_steps = 0
+        self.delivery_rate_thresh = 0.55
 
         # ======================
         # For transfer learning only
@@ -309,38 +310,30 @@ class Maze0523Env(core.Env):
 
         done = False
         reward = -0.05
-        if delivery_rate >= 0.90 * self.delivery_rate_goal:
+        if delivery_rate >= 0.90 :
             done = True
             reward += 100
             return done, reward
-        elif delivery_rate >= 0.85 * self.delivery_rate_goal and not self.reward_grad[10]:
-            self.reward_grad[10] = 1
-            reward += 8
-        elif delivery_rate >= 0.8 * self.delivery_rate_goal and not self.reward_grad[0]:
-            self.reward_grad[0] = 1
-            reward += 8
-        elif delivery_rate >= 0.7 * self.delivery_rate_goal and not self.reward_grad[1]:
-            self.reward_grad[1] = 1
-            reward += 4
-        elif delivery_rate >= 0.6 * self.delivery_rate_goal and not self.reward_grad[2]:
-            self.reward_grad[2] = 1
-            reward += 4
-        elif delivery_rate >= 0.5 * self.delivery_rate_goal and not self.reward_grad[3]:
+        elif delivery_rate >= self.delivery_rate_thresh:
+            reward += 100 * (delivery_rate - self.delivery_rate_thresh)
+            self.delivery_rate_thresh = np.copy(delivery_rate)
+
+        if delivery_rate >= 0.5  and not self.reward_grad[3]:
             self.reward_grad[3] = 1
             reward += 4
-        elif delivery_rate >= 0.4 * self.delivery_rate_goal and not self.reward_grad[4]:
+        elif delivery_rate >= 0.4  and not self.reward_grad[4]:
             self.reward_grad[4] = 1
             reward += 2
-        elif delivery_rate >= 0.3 * self.delivery_rate_goal and not self.reward_grad[5]:
+        elif delivery_rate >= 0.3  and not self.reward_grad[5]:
             self.reward_grad[5] = 1
             reward += 2
-        elif delivery_rate >= 0.2 * self.delivery_rate_goal and not self.reward_grad[6]:
+        elif delivery_rate >= 0.2  and not self.reward_grad[6]:
             self.reward_grad[6] = 1
             reward += 2
-        elif delivery_rate >= 0.1 * self.delivery_rate_goal and not self.reward_grad[7]:
+        elif delivery_rate >= 0.1  and not self.reward_grad[7]:
             self.reward_grad[7] = 1
             reward += 1
-        elif delivery_rate >= 0.05 * self.delivery_rate_goal and not self.reward_grad[8]:
+        elif delivery_rate >= 0.05  and not self.reward_grad[8]:
             self.reward_grad[8] = 1
             reward += 1
         return done, reward
@@ -381,9 +374,7 @@ class Maze0523Env(core.Env):
 
     def expert(self):
         patch_height, patch_width, patch_depth = self.patch.shape
-
         action_weights = np.ones(patch_depth)
-
         for i in range(self.brch.shape[0]):
             action_weights[i] = self.brch_weights[i]* np.sum(np.multiply(self.patch[:,:,i],
                                       self.state_img[self.tlpt[i,0]:self.tlpt[i,0]+patch_height,
@@ -397,53 +388,62 @@ class Maze0523Env(core.Env):
             action = self.rev_action_map[dir]
         return action
 
+def DFS(weights, cur_brch, weight_dict, weights_set):
+    if cur_brch >= len(weights):
+        weights_set.append(np.copy(weights))
+        return
+    for i in range(len(weight_dict)):
+        weights[cur_brch] = weight_dict[i]
+        DFS(weights, cur_brch+1, weight_dict, weights_set)
+
 
 def _main(MazeEnv):
     env = MazeEnv()
-    env.render()
-    episode = 10
+    # env.render()
+    episode = 2
     steps = 0
     import time
     start = time.time()
-    weight_dict = [1,2,6]
-    for wi in weight_dict:
-        for wj in weight_dict:
-            for wk in weight_dict:
-                env.brch_weights = [wi,wj,wk]
-                print('weights==', env.brch_weights)
-                delivery = []
-                steps = 0
-                for i in range(episode):
-                    done = False
-                    while not done:
-                        # if i % 200 == 0:
-                        #     now = time.time()
-                        #     print('step {} time elapse {}'.format(i, now - start))
-                        #     start = now
-                        steps += 1
-                        next_action = env.expert()
-                        _, _, done, _ =env._step(next_action)
-                        # env.render()
-                        # print('Step = %d, delivery_rate = %.2f, rewards = %.1f, reward = %.1f, done = %d' % (steps, env.delivery_rate, rewards, reward, done))
-                        if steps>0 and steps % 300 == 0:
-                            delivery.append(env.delivery_rate)
-                            done = True
+    weight_dict = [1, 2, 4, 8]
+    brch_size = env.brch_weights.shape[0]
+    weights = [1] * brch_size
+    weights_set = []
+    DFS(weights=weights, cur_brch=0, weight_dict=weight_dict, weights_set=weights_set)
 
-                        if done:
-                            steps = 0
-                            env.reset()
-                print('deli mean = ', np.mean(delivery), 'deli std = ', np.std(delivery))
+    for env.brch_weights in weights_set:
+        delivery = []
+        steps = 0
+        for i in range(episode):
+            done = False
+            while not done:
+                # if i % 200 == 0:
+                #     now = time.time()
+                #     print('step {} time elapse {}'.format(i, now - start))
+                #     start = now
+                steps += 1
+                next_action = env.expert()
+                _, _, done, _ =env.step(next_action)
+                # env.render()
+                # print('Step = %d, delivery_rate = %.2f, rewards = %.1f, reward = %.1f, done = %d' % (steps, env.delivery_rate, rewards, reward, done))
+                if steps>0 and steps % 300 == 0:
+                    delivery.append(env.delivery_rate)
+                    done = True
+
+                if done:
+                    steps = 0
+                    env.reset()
+        mean = 100.0 * np.mean(delivery)
+        std = 100.0 * np.std(delivery)
+        print('weights= ', env.brch_weights, ' deli mean = ', mean, '% ', ' deli std = ', std)
+
 
 def main(MazeEnv):
     env = MazeEnv()
     env.render()
-    episode = 10
     steps = 0
     import time
     start = time.time()
-
-    env.brch_weights = [1, 2, 1]
-    print('weights==', env.brch_weights)
+    env.brch_weights = [1, 1, 1, 1, 1]
     steps = 0
     while 1:
         # if i % 200 == 0:
@@ -454,11 +454,11 @@ def main(MazeEnv):
         next_action = env.expert()
         _, _, done, _ =env.step(next_action)
         env.render()
-        # print('Step = %d, delivery_rate = %.2f, rewards = %.1f, reward = %.1f, done = %d' % (steps, env.delivery_rate, rewards, reward, done))
+        print('Step = %d, delivery_rate = %.2f, done = %d' % (steps, env.delivery_rate,  done))
         if steps>0 and steps % 300 == 0:
-            print(env.delivery_rate)
+            print(100.0*env.delivery_rate, '%')
             done = True
-
+            time.sleep(2)
         if done:
             steps = 0
             env.reset()

@@ -67,7 +67,7 @@ class Maze0522Env(core.Env):
 
     def _build_robot(self):
         self.internal_steps = 0
-        self.delivery_rate_thresh = 0.7
+        self.delivery_rate_thresh = 0.55
 
         # ======================
         # For transfer learning only
@@ -277,14 +277,9 @@ class Maze0522Env(core.Env):
             return done, reward
         elif delivery_rate >= self.delivery_rate_thresh:
             reward += 100 * (delivery_rate - self.delivery_rate_thresh)
-            self.delivery_rate_thresh = delivery_rate
-        elif delivery_rate >= 0.7  and not self.reward_grad[1]:
-            self.reward_grad[1] = 1
-            reward += 4
-        elif delivery_rate >= 0.6  and not self.reward_grad[2]:
-            self.reward_grad[2] = 1
-            reward += 4
-        elif delivery_rate >= 0.5  and not self.reward_grad[3]:
+            self.delivery_rate_thresh = np.copy(delivery_rate)
+
+        if delivery_rate >= 0.5  and not self.reward_grad[3]:
             self.reward_grad[3] = 1
             reward += 4
         elif delivery_rate >= 0.4  and not self.reward_grad[4]:

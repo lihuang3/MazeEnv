@@ -3,6 +3,31 @@ from gym.envs.registration import registry, register, make, spec
 # Swarm Path Planning
 # ----------------------------------------
 register(
+    id='Maze0523Env-v4',
+    entry_point='gym.envs.my_games:Maze0523Env4',
+    max_episode_steps=272,
+)
+
+register(
+    id='Maze0523Env-v5',
+    entry_point='gym.envs.my_games:Maze0523Env5',
+    max_episode_steps=272,
+)
+
+register(
+    id='Maze0523Env-v2',
+    entry_point='gym.envs.my_games:Maze0523Env2',
+    max_episode_steps=200,
+)
+
+register(
+    id='Maze0523Env-v3',
+    entry_point='gym.envs.my_games:Maze0523Env3',
+    max_episode_steps=188,
+)
+
+
+register(
     id='Maze0523Env-v0',
     entry_point='gym.envs.my_games:Maze0523Env',
     max_episode_steps=300,

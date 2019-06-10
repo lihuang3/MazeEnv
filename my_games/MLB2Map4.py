@@ -5,7 +5,7 @@ import random, skimage
 ROOT_PATH = os.path.abspath('./MapData')
 
 mapfile = 'map0523'
-filename = 'map0523v1'
+filename = 'map0523'
 
 # Load hand-craft binary maze
 
@@ -49,14 +49,14 @@ costMap = np.copy(mazeData)
 pgrad = np.copy(mazeData)
 flowMapCol = 0 * mazeData
 flowMapRow = 0 * mazeData
-goal = [37, 36]
+goal = [61, 56]
 
 ## for map0522
 # v0 [158, 18]
 # v1 [22, 56]
 
 ## For map0523
-# v0 [68, 45]
+# v0 [61, 56]
 # v1 [37, 36]
 
 BSF_Frontier = []
@@ -405,6 +405,7 @@ for idx, item in enumerate(endpoint_brchpts_dict):
     dir = dir_dict1[np.argmax(np.dot(np.array(dir_dict1), control))]
     endpt_brch_control_dict[item] = {(brchs[0][0], brchs[0][1]): dir}
     for i in range(1, len(brchs)-1):
+        # slope: [downstream_dir_vector, upstream_dir_vector]
         slope = [brch_slope_downstream[(brchs[i-1][0], brchs[i-1][1])], brch_slope_upstream[(brchs[i][0], brchs[i][1])]]
         endpt_brch_slope_dict[item].update({(brchs[i][0], brchs[i][1]): slope})
 
@@ -414,10 +415,16 @@ for idx, item in enumerate(endpoint_brchpts_dict):
             control = candit1
         else:
             control = candit2
+        ## control along perpendicular direction of the upstream
         dir = dir_dict1[np.argmax(np.dot(np.array(dir_dict1), control))]
+        ## control along tangent direction of the downstream
+        # dir = dir_dict1[np.argmax(np.dot(np.array(dir_dict1), slope[0]))]
+
         endpt_brch_control_dict[item].update({(brchs[i][0], brchs[i][1]): dir})
 
+        """
         ## Visualize downstream head
+        """
         # tmp_fig = np.copy(skel + mazeData)
         # line1 = [brchs[i], brchs[i] + slope[1]]
         # y1, x1 = [line1[0][0], line1[1][0]], [line1[0][1], line1[1][1]]
@@ -448,17 +455,17 @@ np.savetxt('{}/{}_endpt_brch_control_map.csv'.format(ROOT_PATH, mapfile), endpt_
 # Find patches
 detection_map = 0 * mazeData
 detection_patch = np.zeros([len(brchpt), 500], dtype=np.int16)
-thresh = 6
+thresh1, thresh2 = 1, 6
 for i,brch in enumerate(brchpt):
     tmp_map = 0 * mazeData
     grad = pgrad[brch[0], brch[1]]
-    tmp_map[np.logical_and(pgrad<=grad+1, pgrad>=grad-thresh)] = 1
+    tmp_map[np.logical_and(pgrad<=grad+thresh1, pgrad>=grad-thresh2)] = 1
     BSF_Frontier = [brch]
     while len(BSF_Frontier)>0:
         for dir in dir_dict1:
             new_pt = BSF_Frontier[0] + np.array(dir)
-            if pgrad[new_pt[0], new_pt[1]] <=grad+1\
-                    and pgrad[new_pt[0], new_pt[1]] >=grad-thresh \
+            if pgrad[new_pt[0], new_pt[1]] <=grad+thresh1\
+                    and pgrad[new_pt[0], new_pt[1]] >=grad-thresh2 \
                     and tmp_map[new_pt[0],new_pt[1]]==1:
                 BSF_Frontier.append(new_pt)
                 tmp_map[new_pt[0],new_pt[1]] = 2
