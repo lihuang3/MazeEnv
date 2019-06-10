@@ -30,13 +30,13 @@ register(
 register(
     id='Maze0523Env-v0',
     entry_point='gym.envs.my_games:Maze0523Env',
-    max_episode_steps=300,
+    max_episode_steps=280,
 )
 
 register(
     id='Maze0523Env-v1',
     entry_point='gym.envs.my_games:Maze0523Env1',
-    max_episode_steps=300,
+    max_episode_steps=260,
 )
 
 register(
@@ -67,13 +67,13 @@ register(
 register(
     id='Maze0522Env-v0',
     entry_point='gym.envs.my_games:Maze0522Env',
-    max_episode_steps=320,
+    max_episode_steps=300,
 )
 
 register(
     id='Maze0522Env-v1',
     entry_point='gym.envs.my_games:Maze0522Env1',
-    max_episode_steps=320,
+    max_episode_steps=280,
 )
 
 register(

@@ -39,13 +39,14 @@ class Maze0522Env3(core.Env):
                                (-1, 0): 4, (-1, -1): 5, (0, -1): 6, (1, -1): 7, (0, 0): 8}
         self.n_actions = len(self.actions)
         self.action_space = spaces.Discrete(self.n_actions)
+        self.goal = np.array([22, 56])
+
         self._load_data(self.map_data_dir)
         mazeHeight, mazeWidth = self.mazeData.shape
         self.observation_space = spaces.Box(low=0, high=255, shape=(mazeHeight, mazeWidth, 1), dtype=np.uint8)
         self.seed()
         self.maze = 1.0 - self.mazeData
         self.freespace = 1.0 - self.freespaceData
-        self.goal = np.array([22, 56])
         self.init_state = []
         self.reset()
 
@@ -63,14 +64,18 @@ class Maze0522Env3(core.Env):
         self.pgradData = np.loadtxt(data_directory + '/' + mapname + '_pgrad.csv').astype(int)
         self.flowstatsData = np.loadtxt(data_directory + '/' + mapname + '_flowstats.csv').astype(float)
         self.visitData = np.loadtxt(data_directory + '/' + mapname + '_visit.csv').astype(float)
+        self.endpt_brch_map = np.loadtxt(data_directory + '/' + mapname + '_endpt_brch_map.csv').astype(int)
+        self.detection_patch = np.loadtxt(data_directory + '/' + mapname + '_detect_patch.csv').astype(int)
+        self.endpt_brch_control_map = np.loadtxt(data_directory + '/' + mapname + '_endpt_brch_control_map.csv').astype(int)
 
         self.get_flowmap()
         self.get_flowstats()
+        self._init_control()
 
 
     def _build_robot(self):
         self.internal_steps = 0
-        self.delivery_rate_thresh = 0.55
+        self.delivery_rate_thresh = 0.0
         # ======================
         # For transfer learning only
         self.tflearn = False
@@ -276,28 +281,28 @@ class Maze0522Env3(core.Env):
             done = True
             reward += 100
             return done, reward
-        elif delivery_rate >= self.delivery_rate_thresh:
-            reward += 100 * (delivery_rate - self.delivery_rate_thresh)
+        elif delivery_rate >= 0.025 + self.delivery_rate_thresh:
+            reward += 40 * (delivery_rate - self.delivery_rate_thresh)
             self.delivery_rate_thresh = np.copy(delivery_rate)
 
-        if delivery_rate >= 0.5  and not self.reward_grad[3]:
-            self.reward_grad[3] = 1
-            reward += 4
-        elif delivery_rate >= 0.4  and not self.reward_grad[4]:
-            self.reward_grad[4] = 1
-            reward += 2
-        elif delivery_rate >= 0.3  and not self.reward_grad[5]:
-            self.reward_grad[5] = 1
-            reward += 2
-        elif delivery_rate >= 0.2  and not self.reward_grad[6]:
-            self.reward_grad[6] = 1
-            reward += 2
-        elif delivery_rate >= 0.1  and not self.reward_grad[7]:
-            self.reward_grad[7] = 1
-            reward += 1
-        elif delivery_rate >= 0.05  and not self.reward_grad[8]:
-            self.reward_grad[8] = 1
-            reward += 1
+        # if delivery_rate >= 0.5  and not self.reward_grad[3]:
+        #     self.reward_grad[3] = 1
+        #     reward += 4
+        # elif delivery_rate >= 0.4  and not self.reward_grad[4]:
+        #     self.reward_grad[4] = 1
+        #     reward += 2
+        # elif delivery_rate >= 0.3  and not self.reward_grad[5]:
+        #     self.reward_grad[5] = 1
+        #     reward += 2
+        # elif delivery_rate >= 0.2  and not self.reward_grad[6]:
+        #     self.reward_grad[6] = 1
+        #     reward += 2
+        # elif delivery_rate >= 0.1  and not self.reward_grad[7]:
+        #     self.reward_grad[7] = 1
+        #     reward += 1
+        # elif delivery_rate >= 0.05  and not self.reward_grad[8]:
+        #     self.reward_grad[8] = 1
+        #     reward += 1
         return done, reward
 
     def render(self, mode='human'):

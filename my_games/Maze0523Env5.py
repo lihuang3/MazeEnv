@@ -316,28 +316,28 @@ class Maze0523Env5(core.Env):
             done = True
             reward += 100
             return done, reward
-        elif delivery_rate >= self.delivery_rate_thresh:
-            reward += 100 * (delivery_rate - self.delivery_rate_thresh)
+        elif delivery_rate >= 0.025 + self.delivery_rate_thresh:
+            reward += 40 * (delivery_rate - self.delivery_rate_thresh)
             self.delivery_rate_thresh = np.copy(delivery_rate)
 
-        if delivery_rate >= 0.5  and not self.reward_grad[3]:
-            self.reward_grad[3] = 1
-            reward += 4
-        elif delivery_rate >= 0.4  and not self.reward_grad[4]:
-            self.reward_grad[4] = 1
-            reward += 2
-        elif delivery_rate >= 0.3  and not self.reward_grad[5]:
-            self.reward_grad[5] = 1
-            reward += 2
-        elif delivery_rate >= 0.2  and not self.reward_grad[6]:
-            self.reward_grad[6] = 1
-            reward += 2
-        elif delivery_rate >= 0.1  and not self.reward_grad[7]:
-            self.reward_grad[7] = 1
-            reward += 1
-        elif delivery_rate >= 0.05  and not self.reward_grad[8]:
-            self.reward_grad[8] = 1
-            reward += 1
+        # if delivery_rate >= 0.5  and not self.reward_grad[3]:
+        #     self.reward_grad[3] = 1
+        #     reward += 4
+        # elif delivery_rate >= 0.4  and not self.reward_grad[4]:
+        #     self.reward_grad[4] = 1
+        #     reward += 2
+        # elif delivery_rate >= 0.3  and not self.reward_grad[5]:
+        #     self.reward_grad[5] = 1
+        #     reward += 2
+        # elif delivery_rate >= 0.2  and not self.reward_grad[6]:
+        #     self.reward_grad[6] = 1
+        #     reward += 2
+        # elif delivery_rate >= 0.1  and not self.reward_grad[7]:
+        #     self.reward_grad[7] = 1
+        #     reward += 1
+        # elif delivery_rate >= 0.05  and not self.reward_grad[8]:
+        #     self.reward_grad[8] = 1
+        #     reward += 1
         return done, reward
 
     def render(self, mode='human'):

@@ -72,7 +72,7 @@ class Maze0523Env(core.Env):
 
     def _build_robot(self):
         self.internal_steps = 0
-        self.delivery_rate_thresh = 0.55
+        self.delivery_rate_thresh = 0.0
 
         # ======================
         # For transfer learning only
@@ -314,28 +314,29 @@ class Maze0523Env(core.Env):
             done = True
             reward += 100
             return done, reward
-        elif delivery_rate >= self.delivery_rate_thresh:
-            reward += 100 * (delivery_rate - self.delivery_rate_thresh)
+        elif delivery_rate >= 0.025 + self.delivery_rate_thresh:
+            reward += 40 * (delivery_rate - self.delivery_rate_thresh)
             self.delivery_rate_thresh = np.copy(delivery_rate)
-
-        if delivery_rate >= 0.5  and not self.reward_grad[3]:
-            self.reward_grad[3] = 1
-            reward += 4
-        elif delivery_rate >= 0.4  and not self.reward_grad[4]:
-            self.reward_grad[4] = 1
-            reward += 2
-        elif delivery_rate >= 0.3  and not self.reward_grad[5]:
-            self.reward_grad[5] = 1
-            reward += 2
-        elif delivery_rate >= 0.2  and not self.reward_grad[6]:
-            self.reward_grad[6] = 1
-            reward += 2
-        elif delivery_rate >= 0.1  and not self.reward_grad[7]:
-            self.reward_grad[7] = 1
-            reward += 1
-        elif delivery_rate >= 0.05  and not self.reward_grad[8]:
-            self.reward_grad[8] = 1
-            reward += 1
+        # if reward>0:
+        #     print(reward)
+        # if delivery_rate >= 0.5  and not self.reward_grad[3]:
+        #     self.reward_grad[3] = 1
+        #     reward += 4
+        # elif delivery_rate >= 0.4  and not self.reward_grad[4]:
+        #     self.reward_grad[4] = 1
+        #     reward += 2
+        # elif delivery_rate >= 0.3  and not self.reward_grad[5]:
+        #     self.reward_grad[5] = 1
+        #     reward += 2
+        # elif delivery_rate >= 0.2  and not self.reward_grad[6]:
+        #     self.reward_grad[6] = 1
+        #     reward += 2
+        # elif delivery_rate >= 0.1  and not self.reward_grad[7]:
+        #     self.reward_grad[7] = 1
+        #     reward += 1
+        # elif delivery_rate >= 0.05  and not self.reward_grad[8]:
+        #     self.reward_grad[8] = 1
+        #     reward += 1
         return done, reward
 
     def render(self, mode='human'):
@@ -445,6 +446,7 @@ def main(MazeEnv):
     start = time.time()
     env.brch_weights = [1, 1, 1, 1, 1]
     steps = 0
+    rewards = 0.0
     while 1:
         # if i % 200 == 0:
         #     now = time.time()
@@ -452,15 +454,17 @@ def main(MazeEnv):
         #     start = now
         steps += 1
         next_action = env.expert()
-        _, _, done, _ =env.step(next_action)
+        _, reward, done, _ =env.step(next_action)
+        rewards += reward
         env.render()
-        print('Step = %d, delivery_rate = %.2f, done = %d' % (steps, env.delivery_rate,  done))
-        if steps>0 and steps % 300 == 0:
+        print('Step = %d, delivery_rate = %.2f, rewards = %.2f, done = %d' % (steps, env.delivery_rate,  rewards, done))
+        if steps>0 and steps % 280 == 0:
             print(100.0*env.delivery_rate, '%')
             done = True
             time.sleep(2)
         if done:
             steps = 0
+            rewards = 0.0
             env.reset()
 
 
