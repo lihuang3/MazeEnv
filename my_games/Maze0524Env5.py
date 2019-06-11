@@ -581,6 +581,7 @@ def main(MazeEnv, args):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('--render', type=int, default=0, choices=[0, 1])
 
     parser.add_argument('--render', type=int, default=0, choices=[0, 1])
     parser.add_argument('--mode', type=str, default='test', choices=['train', 'test', 'fitu'])
