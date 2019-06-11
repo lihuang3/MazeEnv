@@ -273,12 +273,6 @@ class Maze0523Env5(core.Env):
         for _ in range(3):
             self.flow_step()
 
-        # =====================
-        # Transfer learning
-        if self.tflearn:
-            action = self.instructor()
-            info = {'ac': action}
-        # =====================
 
         dy, dx = self.action_map[action]
 
