@@ -539,7 +539,7 @@ def main(MazeEnv, args):
 
     start = time.time()
 
-    for episode in range(nepisodes):
+    for episode in range(my_portion):
         done = False
         while not done:
             steps += 1
@@ -553,8 +553,8 @@ def main(MazeEnv, args):
                 done = True
                 sendbuf[episode] = env.delivery_rate
                 time_left = str(
-                    datetime.timedelta(seconds=(time.time() - start) * (nepisodes - episode - 1) / (episode + 1)))
-                print('%d/%d' % (1 + episode, nepisodes), 'worker_%d' % (my_rank), 'time left:', time_left[:-7],
+                    datetime.timedelta(seconds=(time.time() - start) * (my_portion - episode - 1) / (episode + 1)))
+                print('%d/%d' % (1 + episode, my_portion), 'worker_%d' % (my_rank), 'time left:', time_left[:-7],
                       ' delivery=%.2f' % (100.0*env.delivery_rate), '% ')
                 sys.stdout.flush()
 
