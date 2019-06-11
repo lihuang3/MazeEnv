@@ -590,6 +590,7 @@ if __name__ == '__main__':
     parser.add_argument('--nsteps', type=int, default=300)
     parser.add_argument('--weights', type=list, default=[1, 4, 1])
     args = parser.parse_args()
+    # mean, std = 53.02, 4.76
 
     maze = Maze0522Env
     if args.mode == 'test':

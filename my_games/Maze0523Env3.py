@@ -591,7 +591,7 @@ if __name__ == '__main__':
     parser.add_argument('--nsteps', type=int, default=200)
     parser.add_argument('--weights', type=list, default=[8, 4, 1, 1, 2])
     # [8, 8, 2, ,2, 2],  [8, 4, 1, 1, 1]
-
+    # mean , std = 18.33, 3.90
 
     args = parser.parse_args()
 

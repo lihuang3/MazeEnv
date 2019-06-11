@@ -588,6 +588,7 @@ if __name__ == '__main__':
     parser.add_argument('--env', type=str, default='Maze0523Env4')
     parser.add_argument('--nsteps', type=int, default=280)
     parser.add_argument('--weights', type=list, default=[1, 8, 4, 4, 1])
+    # mean, std = 24.21, 4.93
 
     args = parser.parse_args()
 
