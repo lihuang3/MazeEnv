@@ -555,7 +555,7 @@ if __name__ == '__main__':
     parser.add_argument('--mode', type=str, default='test', choices=['train', 'test', 'fitu'])
     parser.add_argument('--env', type=str, default='Maze0523Env4')
     parser.add_argument('--nsteps', type=int, default=280)
-    parser.add_argument('--weights', type=list, default=[1, 1, 1, 1, 1])
+    parser.add_argument('--weights', type=list, default=[1, 8, 4, 4, 1])
 
     args = parser.parse_args()
 
