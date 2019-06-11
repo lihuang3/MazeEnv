@@ -454,7 +454,7 @@ def _main(MazeEnv, args):
     MPI.COMM_WORLD.Gather(sendbuf, recvbuf, root=0)
     if my_rank == 0:
         recvbuf = np.reshape(recvbuf, [-1, brch_size+2])
-        assert(recvbuf.min()>=0)
+        
         sorted_res = recvbuf[recvbuf[:,0].argsort()]
         print(sorted_res[-32:,:])
         weight_dir = os.path.abspath('./weights')
@@ -516,7 +516,7 @@ def finetune(MazeEnv, args):
     MPI.COMM_WORLD.Gather(sendbuf, recvbuf, root=0)
     if my_rank == 0:
         recvbuf = np.reshape(recvbuf, [-1, brch_size+2])
-        assert(recvbuf.min()>=0)
+        
         sorted_res = recvbuf[recvbuf[:,0].argsort()]
         print(sorted_res)
 
@@ -554,8 +554,8 @@ if __name__ == '__main__':
     parser.add_argument('--mode', type=str, default='test', choices=['train', 'test', 'fitu'])
     parser.add_argument('--env', type=str, default='Maze0522Env5')
     parser.add_argument('--nsteps', type=int, default=290)
-    parser.add_argument('--weights', type=list, default=[1, 1, 1, 1])
-
+    parser.add_argument('--weights', type=list, default=[1, 1, 2, 2])
+    # [2, 1, 4, 8], [2, 2, 8, 1]
     args = parser.parse_args()
 
     maze = Maze0522Env5
