@@ -130,7 +130,8 @@ class Maze0523Env4(core.Env):
         self.patch = np.zeros([patch_height, patch_width, brch_size], dtype=np.int)
         self.tlpt = np.zeros([brch_size, 2], dtype=np.int)
         for i in range(brch_size):
-            idx = np.where(self.brch[i,:]- self.detection_patch[:,:2] == [0, 0])[0][0]
+            idx = np.where((self.brch[i, :] == self.detection_patch[:, :2]).all(axis=1))[0][0]
+
             num_pix = self.detection_patch[idx, 2]
             rows, cols = self.detection_patch[idx, 7:num_pix], self.detection_patch[idx, 7+num_pix:7+2*num_pix]
             tl_row, tl_col = self.detection_patch[idx, 3], self.detection_patch[idx, 5]
