@@ -1,5 +1,5 @@
 """
-  gym id: Maze0524Env-v0
+  gym id: Maze0524Env-v1
   Input: gray-scale images
   Reward: region range basis (easy)
   Render: gray-scale visualization
@@ -20,7 +20,7 @@ from time import sleep
 plt.ion()
 
 
-class Maze0524Env(core.Env):
+class Maze0524Env1(core.Env):
     def __init__(self):
 
         dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -40,7 +40,7 @@ class Maze0524Env(core.Env):
                                (-1, 0): 4, (-1, -1): 5, (0, -1): 6, (1, -1): 7, (0, 0): 8}
         self.n_actions = len(self.actions)
         self.action_space = spaces.Discrete(self.n_actions)
-        self.goal = np.array([52, 69])
+        self.goal = np.array([278, 64])
 
         self._load_data(self.map_data_dir)
         mazeHeight, mazeWidth = self.mazeData.shape
@@ -56,16 +56,18 @@ class Maze0524Env(core.Env):
         return [seed]
 
     def _load_data(self, data_directory):
-        filename = 'map0524'
-        self.mazeData = np.loadtxt(data_directory + '/' + filename + '.csv').astype(int)
-        self.freespaceData = np.loadtxt(data_directory + '/' + filename + '_freespace.csv').astype(int)
+        mapname = 'map0524'
+        filename = 'map0524v1'
+
+        self.mazeData = np.loadtxt(data_directory + '/' + mapname + '.csv').astype(int)
+        self.freespaceData = np.loadtxt(data_directory + '/' + mapname + '_freespace.csv').astype(int)
         self.costData = np.loadtxt(data_directory + '/' + filename + '_costmap.csv').astype(int)
-        self.pgradData = np.loadtxt(data_directory + '/' + filename + '_pgrad.csv').astype(int)
-        self.flowstatsData = np.loadtxt(data_directory + '/' + filename + '_flowstats.csv').astype(float)
-        self.visitData = np.loadtxt(data_directory + '/' + filename + '_visit.csv').astype(float)
-        self.endpt_brch_map = np.loadtxt(data_directory + '/' + filename + '_endpt_brch_map.csv').astype(int)
-        self.detection_patch = np.loadtxt(data_directory + '/' + filename + '_detect_patch.csv').astype(int)
-        self.endpt_brch_control_map = np.loadtxt(data_directory + '/' + filename + '_endpt_brch_control_map.csv').astype(int)
+        self.pgradData = np.loadtxt(data_directory + '/' + mapname + '_pgrad.csv').astype(int)
+        self.flowstatsData = np.loadtxt(data_directory + '/' + mapname + '_flowstats.csv').astype(float)
+        self.visitData = np.loadtxt(data_directory + '/' + mapname + '_visit.csv').astype(float)
+        self.endpt_brch_map = np.loadtxt(data_directory + '/' + mapname + '_endpt_brch_map.csv').astype(int)
+        self.detection_patch = np.loadtxt(data_directory + '/' + mapname + '_detect_patch.csv').astype(int)
+        self.endpt_brch_control_map = np.loadtxt(data_directory + '/' + mapname + '_endpt_brch_control_map.csv').astype(int)
         self.get_flowmap()
         self.get_flowstats()
         self._init_control()
@@ -531,7 +533,7 @@ def main(MazeEnv, args):
     while 1:
         steps += 1
         next_action = env.expert()
-        _, reward, done, _ = env.step(next_action)
+        _, reward, done, _ = env._step(next_action)
         rewards += reward
         env.render()
         print('Step = %d, deli = %.2f, rew = %.2f, done = %d' % (steps, env.delivery_rate, rewards, done))
@@ -550,13 +552,13 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument('--mode', type=str, default='test', choices=['train', 'test', 'fitu'])
-    parser.add_argument('--env', type=str, default='Maze0524Env')
-    parser.add_argument('--nsteps', type=int, default=420)
+    parser.add_argument('--env', type=str, default='Maze0524Env1')
+    parser.add_argument('--nsteps', type=int, default=500)
     parser.add_argument('--weights', type=list, default=[1,1, 1, 1, 1])
 
     args = parser.parse_args()
 
-    maze = Maze0524Env
+    maze = Maze0524Env1
     if args.mode == 'test':
         main(maze, args)
     elif args.mode == 'train':

@@ -467,7 +467,7 @@ np.savetxt('{}/{}_endpt_brch_control_map.csv'.format(ROOT_PATH, mapfile), endpt_
 # Find patches
 detection_map = 0 * mazeData
 detection_patch = np.zeros([len(brchpt), 600], dtype=np.int16)
-thresh1, thresh2 = 2, 8
+thresh1, thresh2 = 0, 8
 for i,brch in enumerate(brchpt):
     tmp_map = 0 * mazeData
     grad = pgrad[brch[0], brch[1]]
