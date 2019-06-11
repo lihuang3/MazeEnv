@@ -413,7 +413,7 @@ def _main(MazeEnv, args):
 
     # if MPI.COMM_WORLD.Get_size() > 1:
     num_workers = MPI.COMM_WORLD.Get_size()
-    assert weights_set.shape[0] % num_workers == 0
+    assert len(weights_set) % num_workers == 0
     my_rank = int(MPI.COMM_WORLD.Get_rank())
     my_portion = int(len(weights_set) / num_workers)
     weights_set = weights_set[ my_rank*my_portion:(my_rank+1)*my_portion ]
@@ -581,7 +581,7 @@ if __name__ == '__main__':
     parser.add_argument('--nsteps', type=int, default=360)
     parser.add_argument('--weights', type=list, default=[8, 4, 2, 8, 1])
     # [4, 1, 1, 8, 1], [8, 1, 1, 8, 1]
-
+    # mean = 15.52, std = 2.41 trials=128
     args = parser.parse_args()
 
     maze = Maze0524Env4

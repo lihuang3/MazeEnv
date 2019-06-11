@@ -416,7 +416,7 @@ def _main(MazeEnv, args):
 
     # if MPI.COMM_WORLD.Get_size() > 1:
     num_workers = MPI.COMM_WORLD.Get_size()
-    assert num_workers % len(weights_set)
+    assert len(weights_set) % num_workers  == 0
     my_rank = int(MPI.COMM_WORLD.Get_rank())
     my_portion = int(len(weights_set) / num_workers)
     weights_set = weights_set[ my_rank*my_portion:(my_rank+1)*my_portion ]
@@ -521,36 +521,68 @@ def finetune(MazeEnv, args):
         print(sorted_res)
 
 def main(MazeEnv, args):
+    import datetime
     env = MazeEnv()
-    env.render()
+    if args.render:
+        env.render()
     steps = 0
     rewards = 0
-    import time
-    start = time.time()
     env.brch_weights = args.weights
-
     steps = 0
-    while 1:
-        steps += 1
-        next_action = env.expert()
-        _, reward, done, _ = env.step(next_action)
-        rewards += reward
-        env.render()
-        print('Step = %d, deli = %.2f, rew = %.2f, done = %d' % (steps, env.delivery_rate, rewards, done))
-        if steps > 0 and steps % args.nsteps == 0:
-            print('deli = ', 100.0 * env.delivery_rate, '%', 'rew = %.2f'%(rewards))
-            done = True
-            time.sleep(2)
-        if done:
-            steps = 0
-            rewards = 0
-            env.reset()
+    nepisodes = 128
+
+    # set up MPI
+    from mpi4py import MPI
+    num_workers = MPI.COMM_WORLD.Get_size()
+    assert nepisodes % num_workers == 0
+    my_rank = int(MPI.COMM_WORLD.Get_rank())
+    my_portion = int(nepisodes / num_workers)
+    sendbuf = -1.0 * np.ones([my_portion], dtype=float)
+    recvbuf = None
+    if my_rank == 0:
+        recvbuf = np.empty([num_workers, my_portion], dtype=np.float)
+
+    start = time.time()
+
+    for episode in range(my_portion):
+        done = False
+        while not done:
+            steps += 1
+            next_action = env.expert()
+            _, reward, done, _ = env.step(next_action)
+            rewards += reward
+            if args.render:
+                env.render()
+                print('Step = %d, deli = %.2f, rew = %.2f, done = %d' % (steps, env.delivery_rate, rewards, done))
+            if steps > 0 and steps % args.nsteps == 0:
+                done = True
+                sendbuf[episode] = env.delivery_rate
+                time_left = str(
+                    datetime.timedelta(seconds=(time.time() - start) * (my_portion - episode - 1) / (episode + 1)))
+                print('%d/%d' % (1 + episode, my_portion), 'worker_%d' % (my_rank), 'time left:', time_left[:-7],
+                      ' delivery=%.2f' % (100.0*env.delivery_rate), '% ')
+                sys.stdout.flush()
+
+                if args.render:
+                    print('deli = ', 100.0 * env.delivery_rate, '%', 'rew = %.2f'%(rewards))
+                    time.sleep(2)
+            if done:
+                steps = 0
+                rewards = 0
+                env.reset()
+
+    MPI.COMM_WORLD.Gather(sendbuf, recvbuf, root=0)
+    if my_rank == 0:
+        recvbuf = np.reshape(recvbuf, [-1, 1])
+        mean, std = 100. * np.mean(recvbuf), 100.*np.std(recvbuf)
+        print('mean = %.2f, std = %.2f'%(mean, std))
 
 
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
+    parser.add_argument('--render', type=int, default=0, choices=[0, 1])
     parser.add_argument('--mode', type=str, default='test', choices=['train', 'test', 'fitu'])
     parser.add_argument('--env', type=str, default='Maze0524Env3')
     parser.add_argument('--nsteps', type=int, default=400)
