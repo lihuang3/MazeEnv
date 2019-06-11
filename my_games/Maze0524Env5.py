@@ -1,5 +1,5 @@
 """
-  gym id: Maze0524Env-v1
+  gym id: Maze0524Env-v5
   Input: gray-scale images
   Reward: region range basis (easy)
   Render: gray-scale visualization
@@ -20,7 +20,7 @@ from time import sleep
 plt.ion()
 
 
-class Maze0524Env1(core.Env):
+class Maze0524Env5(core.Env):
     def __init__(self):
 
         dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -83,10 +83,10 @@ class Maze0524Env1(core.Env):
         # ======================
         row, col = np.where(np.logical_and(self.pgradData<=self.init_range, self.pgradData>0 ))
         self.reward_grad = np.zeros(40).astype(np.uint8)
-        self.robot_num = 64  # len(row)
-        self.doses = 4
+        self.robot_num = 16  # len(row)
+        self.doses = 16
         self.doses_remain = self.doses - 1
-        self.dose_gap = 100
+        self.dose_gap = 15
         self.robot_num_orig = np.copy(self.robot_num)
         self.robot_num_prev = np.copy(self.robot_num)
         probs = self.visitData[row, col] / np.sum(self.visitData[row, col])
@@ -552,13 +552,13 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument('--mode', type=str, default='test', choices=['train', 'test', 'fitu'])
-    parser.add_argument('--env', type=str, default='Maze0524Env1')
-    parser.add_argument('--nsteps', type=int, default=500)
+    parser.add_argument('--env', type=str, default='Maze0524Env5')
+    parser.add_argument('--nsteps', type=int, default=400)
     parser.add_argument('--weights', type=list, default=[1,1, 1, 1, 1])
 
     args = parser.parse_args()
 
-    maze = Maze0524Env1
+    maze = Maze0524Env5
     if args.mode == 'test':
         main(maze, args)
     elif args.mode == 'train':

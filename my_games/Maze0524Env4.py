@@ -1,5 +1,5 @@
 """
-  gym id: Maze0524Env-v1
+  gym id: Maze0524Env-v4
   Input: gray-scale images
   Reward: region range basis (easy)
   Render: gray-scale visualization
@@ -20,7 +20,7 @@ from time import sleep
 plt.ion()
 
 
-class Maze0524Env1(core.Env):
+class Maze0524Env4(core.Env):
     def __init__(self):
 
         dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -40,7 +40,7 @@ class Maze0524Env1(core.Env):
                                (-1, 0): 4, (-1, -1): 5, (0, -1): 6, (1, -1): 7, (0, 0): 8}
         self.n_actions = len(self.actions)
         self.action_space = spaces.Discrete(self.n_actions)
-        self.goal = np.array([278, 64])
+        self.goal = np.array([52, 69])
 
         self._load_data(self.map_data_dir)
         mazeHeight, mazeWidth = self.mazeData.shape
@@ -56,18 +56,16 @@ class Maze0524Env1(core.Env):
         return [seed]
 
     def _load_data(self, data_directory):
-        mapname = 'map0524'
-        filename = 'map0524v1'
-
-        self.mazeData = np.loadtxt(data_directory + '/' + mapname + '.csv').astype(int)
-        self.freespaceData = np.loadtxt(data_directory + '/' + mapname + '_freespace.csv').astype(int)
+        filename = 'map0524'
+        self.mazeData = np.loadtxt(data_directory + '/' + filename + '.csv').astype(int)
+        self.freespaceData = np.loadtxt(data_directory + '/' + filename + '_freespace.csv').astype(int)
         self.costData = np.loadtxt(data_directory + '/' + filename + '_costmap.csv').astype(int)
-        self.pgradData = np.loadtxt(data_directory + '/' + mapname + '_pgrad.csv').astype(int)
-        self.flowstatsData = np.loadtxt(data_directory + '/' + mapname + '_flowstats.csv').astype(float)
-        self.visitData = np.loadtxt(data_directory + '/' + mapname + '_visit.csv').astype(float)
-        self.endpt_brch_map = np.loadtxt(data_directory + '/' + mapname + '_endpt_brch_map.csv').astype(int)
-        self.detection_patch = np.loadtxt(data_directory + '/' + mapname + '_detect_patch.csv').astype(int)
-        self.endpt_brch_control_map = np.loadtxt(data_directory + '/' + mapname + '_endpt_brch_control_map.csv').astype(int)
+        self.pgradData = np.loadtxt(data_directory + '/' + filename + '_pgrad.csv').astype(int)
+        self.flowstatsData = np.loadtxt(data_directory + '/' + filename + '_flowstats.csv').astype(float)
+        self.visitData = np.loadtxt(data_directory + '/' + filename + '_visit.csv').astype(float)
+        self.endpt_brch_map = np.loadtxt(data_directory + '/' + filename + '_endpt_brch_map.csv').astype(int)
+        self.detection_patch = np.loadtxt(data_directory + '/' + filename + '_detect_patch.csv').astype(int)
+        self.endpt_brch_control_map = np.loadtxt(data_directory + '/' + filename + '_endpt_brch_control_map.csv').astype(int)
         self.get_flowmap()
         self.get_flowstats()
         self._init_control()
@@ -83,10 +81,10 @@ class Maze0524Env1(core.Env):
         # ======================
         row, col = np.where(np.logical_and(self.pgradData<=self.init_range, self.pgradData>0 ))
         self.reward_grad = np.zeros(40).astype(np.uint8)
-        self.robot_num = 64  # len(row)
-        self.doses = 4
+        self.robot_num = 16  # len(row)
+        self.doses = 16
         self.doses_remain = self.doses - 1
-        self.dose_gap = 100
+        self.dose_gap = 15
         self.robot_num_orig = np.copy(self.robot_num)
         self.robot_num_prev = np.copy(self.robot_num)
         probs = self.visitData[row, col] / np.sum(self.visitData[row, col])
@@ -552,13 +550,13 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument('--mode', type=str, default='test', choices=['train', 'test', 'fitu'])
-    parser.add_argument('--env', type=str, default='Maze0524Env1')
-    parser.add_argument('--nsteps', type=int, default=500)
+    parser.add_argument('--env', type=str, default='Maze0524Env4')
+    parser.add_argument('--nsteps', type=int, default=360)
     parser.add_argument('--weights', type=list, default=[1,1, 1, 1, 1])
 
     args = parser.parse_args()
 
-    maze = Maze0524Env1
+    maze = Maze0524Env4
     if args.mode == 'test':
         main(maze, args)
     elif args.mode == 'train':
