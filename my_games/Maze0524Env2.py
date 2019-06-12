@@ -81,11 +81,6 @@ class Maze0524Env2(core.Env):
         self.internal_steps = 0
         self.delivery_rate_thresh = 0.0
 
-        # ======================
-        # For transfer learning only
-        self.tflearn = False
-        self.cur_robot = None
-        # ======================
         row, col = np.where(np.logical_and(self.pgradData<=self.init_range, self.pgradData>0 ))
         self.reward_grad = np.zeros(40).astype(np.uint8)
         self.robot_num = 64  # len(row)
@@ -632,7 +627,7 @@ def main(MazeEnv, args):
     rewards = 0
     env.brch_weights = args.weights
     steps = 0
-    nepisodes = 2
+    nepisodes = 128
 
     # set up MPI
     from mpi4py import MPI
@@ -690,8 +685,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument('--control', type=int, default=0, choices=[0, 1])
-    parser.add_argument('--save_frame', type=int, default=1, choices=[0, 1])
-    parser.add_argument('--render', type=int, default=1, choices=[0, 1])
+    parser.add_argument('--save_frame', type=int, default=0, choices=[0, 1])
+    parser.add_argument('--render', type=int, default=0, choices=[0, 1])
     parser.add_argument('--mode', type=str, default='test', choices=['train', 'test', 'fitu'])
     parser.add_argument('--env', type=str, default='Maze0524Env2')
     parser.add_argument('--nsteps', type=int, default=320)

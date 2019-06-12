@@ -18,7 +18,8 @@ from gym.utils import seeding
 from time import sleep
 
 plt.ion()
-
+from scipy.stats import gaussian_kde
+ROOT_DIR = os.path.abspath("./")
 
 class Maze0524Env5(core.Env):
     def __init__(self):
@@ -26,7 +27,10 @@ class Maze0524Env5(core.Env):
         dir_path = os.path.dirname(os.path.realpath(__file__))
 
         self.map_data_dir = dir_path + '/MapData'
+        self.save_frame = False
+        self.loc_hist = [[],[],[],[]]
         self.internal_steps = 0
+        os.makedirs(ROOT_DIR+'/frames', exist_ok=True)
 
         self.robot_marker = 150
         self.init_range = 20
@@ -58,7 +62,8 @@ class Maze0524Env5(core.Env):
     def _load_data(self, data_directory):
         mapname = 'map0524'
         filename = 'map0524v1'
-
+        RGBmap = 'map0524'
+        self.raw_img = plt.imread(data_directory + '/'+RGBmap+'.png')
         self.mazeData = np.loadtxt(data_directory + '/' + mapname + '.csv').astype(int)
         self.freespaceData = np.loadtxt(data_directory + '/' + mapname + '_freespace.csv').astype(int)
         self.costData = np.loadtxt(data_directory + '/' + filename + '_costmap.csv').astype(int)
@@ -131,12 +136,15 @@ class Maze0524Env5(core.Env):
         patch_width = 1+np.max(self.detection_patch[:, 6] - self.detection_patch[:, 5])
         self.patch = np.zeros([patch_height, patch_width, brch_size], dtype=np.int)
         self.tlpt = np.zeros([brch_size, 2], dtype=np.int)
+        self.brpt = np.zeros([brch_size, 2], dtype=np.int)
         for i in range(brch_size):
             idx = np.where((self.brch[i, :] == self.detection_patch[:, :2]).all(axis=1))[0][0]
             num_pix = self.detection_patch[idx, 2]
             rows, cols = self.detection_patch[idx, 7:num_pix], self.detection_patch[idx, 7+num_pix:7+2*num_pix]
             tl_row, tl_col = self.detection_patch[idx, 3], self.detection_patch[idx, 5]
+            br_row, br_col = self.detection_patch[idx, 4], self.detection_patch[idx, 6]
             self.tlpt[i,:] = [tl_row, tl_col]
+            self.brpt[i,:] = [br_row, br_col]
             for row, col in zip(rows, cols):
                 self.patch[row-tl_row,col-tl_col,i] = 1
 
@@ -244,6 +252,11 @@ class Maze0524Env5(core.Env):
 
     def _step(self, action):
         info = {}
+
+        self.action = self.rev_action_map[(0, 0)]
+        # For sticky action rendering usage
+        self.loc_hist[self.internal_steps % 4] = self.loc
+
         self.internal_steps += 1
         if self.doses_remain>0 and (self.internal_steps % self.dose_gap == 1) and self.internal_steps>1:
             self.doses_remain -= 1
@@ -265,6 +278,11 @@ class Maze0524Env5(core.Env):
     def step(self, action):
 
         info = {}
+
+        self.action = action
+        # For sticky action rendering usage
+
+        self.loc_hist[self.internal_steps % 4] = self.loc
         self.internal_steps += 1
         if self.doses_remain>0 and (self.internal_steps % self.dose_gap == 1) and self.internal_steps>1:
             self.doses_remain -= 1
@@ -334,7 +352,7 @@ class Maze0524Env5(core.Env):
         #     reward += 1
         return done, reward
 
-    def render(self, mode='human'):
+    def render2(self, mode='human'):
         plt.gcf().clear()
 
         render_image = np.copy(0 * self.maze).astype(np.int16)
@@ -369,6 +387,90 @@ class Maze0524Env5(core.Env):
         plt.show(False)
         plt.pause(0.0001)
 
+    def _render(self, mode = 'human'):
+
+        plt.gcf().clear()
+
+        self.render_config(self.loc, dot_size=15)
+
+        if self.action != self.rev_action_map[(0,0)]:
+            h, w, _ = self.raw_img.shape
+            h1, w1 = self.maze.shape
+            x1, y1 = self.tlpt[self.selected_brch,1], self.tlpt[self.selected_brch,0]
+            x2, y2 = self.brpt[self.selected_brch,1], self.brpt[self.selected_brch,0]
+            rect = plt.Rectangle((w/w1*x1, h/h1*y1), w/w1*(x2-x1), h/h1*(y2-y1), linewidth=2, edgecolor='m', facecolor='none' )
+            plt.gca().add_patch(rect)
+        if self.save_frame:
+            fig = plt.gcf()
+            fig.set_size_inches(9.0, 7.5)
+            filename = ROOT_DIR + '/frames/' + 'fig' + '%05d' % (1 + len(os.listdir(ROOT_DIR + '/frames'))) + '.png'
+            plt.axis('off')
+            fig.tight_layout()
+            fig.subplots_adjust\
+                    (top=1.0,
+                    bottom=0.0,
+                    left=0.0,
+                    right=1.0,
+                    hspace=0.0,
+                    wspace=0.0)
+            plt.savefig(filename, pad_inches=0.0, dpi=100)
+        else:
+            plt.show(False)
+            plt.pause(0.0001)
+
+    def render_config(self, loc, dot_size=15):
+        # Load high-resolution
+        plt.imshow(self.raw_img)
+        h, w, _ = self.raw_img.shape
+        h1, w1 = self.maze.shape
+        # Draw goal range
+        circle = plt.Circle((float(w)/w1*self.goal[1], float(h)/h1*self.goal[0]), 12, linestyle='-', color='red', linewidth=2, fill=False)
+        plt.gcf().gca().add_artist(circle)
+
+        text_str = '%.1f'%(100*self.delivery_rate) + ' %'
+        plt.text(w-60, 25, text_str, fontsize=16)
+        dir = self.action_map[self.action]
+        offset = 80
+        plt.arrow(w-offset, h-offset, 30*dir[1], 30*dir[0], head_width=10, head_length=10, fc='k', ec='k')
+        # Configure robot density
+        ys, xs =float(h)/h1*loc[:,0], float(w)/w1*loc[:,1]
+        xy = np.vstack([xs, ys])
+        z = gaussian_kde(xy)(xy)
+        idx = z.argsort()
+        xs, ys, z = xs[idx], ys[idx], z[idx]
+        cmap = mpl.cm.get_cmap('Blues')
+        upperZ = max(z)
+        lowerZ = min(z)
+        norm = mpl.colors.Normalize(vmin = lowerZ, vmax=upperZ)
+        z[z<0.7*upperZ] = 0.7*upperZ
+        colors = [cmap(norm(value)) for value in z]
+        # Draw robots
+        plt.scatter(xs, ys, c=colors, s=dot_size, edgecolor='')
+
+    def render(self, mode = 'human'):
+        for i in range(4):
+            loc = self.loc_hist[i]
+            plt.gcf().clear()
+
+            self.render_config(loc)
+            if self.save_frame:
+                fig = plt.gcf()
+                fig.set_size_inches(9.0, 7.5)
+                filename = ROOT_DIR + '/frames/' + 'fig' + '%05d' % (1 + len(os.listdir(ROOT_DIR + '/frames'))) + '.png'
+                plt.axis('off')
+                fig.tight_layout()
+                fig.subplots_adjust\
+                        (top=1.0,
+                        bottom=0.0,
+                        left=0.0,
+                        right=1.0,
+                        hspace=0.0,
+                        wspace=0.0)
+                plt.savefig(filename, pad_inches=0.0, dpi=100)
+            else:
+                plt.show(False)
+                plt.pause(0.0001)
+
     def reset(self):
         return self._build_robot()
 
@@ -380,7 +482,7 @@ class Maze0524Env5(core.Env):
                                       self.state_img[self.tlpt[i,0]:self.tlpt[i,0]+patch_height,
                                       self.tlpt[i,1]:self.tlpt[i,1]+patch_width]))/self.robot_marker
         # print( np.exp(action_weights)/sum(np.exp(action_weights)))
-        selected_brch = np.argmax(action_weights)
+        self.selected_brch = selected_brch = np.argmax(action_weights)
         if action_weights[selected_brch] == 0:
             action = self.rev_action_map[(0, 0)]
         else:
@@ -523,8 +625,7 @@ def finetune(MazeEnv, args):
 def main(MazeEnv, args):
     import datetime
     env = MazeEnv()
-    if args.render:
-        env.render()
+    env.save_frame = args.save_frame
     steps = 0
     rewards = 0
     env.brch_weights = args.weights
@@ -549,10 +650,14 @@ def main(MazeEnv, args):
         while not done:
             steps += 1
             next_action = env.expert()
-            _, reward, done, _ = env.step(next_action)
+            if args.control:
+                _, reward, done, _ = env.step(next_action)
+            else:
+                _, reward, done, _ = env._step(next_action)
             rewards += reward
             if args.render:
-                env.render()
+                env._render()
+
                 print('Step = %d, deli = %.2f, rew = %.2f, done = %d' % (steps, env.delivery_rate, rewards, done))
             if steps > 0 and steps % args.nsteps == 0:
                 done = True
@@ -581,8 +686,9 @@ def main(MazeEnv, args):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--render', type=int, default=0, choices=[0, 1])
 
+    parser.add_argument('--control', type=int, default=0, choices=[0, 1])
+    parser.add_argument('--save_frame', type=int, default=0, choices=[0, 1])
     parser.add_argument('--render', type=int, default=0, choices=[0, 1])
     parser.add_argument('--mode', type=str, default='test', choices=['train', 'test', 'fitu'])
     parser.add_argument('--env', type=str, default='Maze0524Env5')
