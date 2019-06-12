@@ -186,6 +186,12 @@ register(
 )
 
 register(
+    id='Maze1203Env-v4',
+    entry_point='gym.envs.my_games:Maze1203Env4',
+    max_episode_steps=1500,
+)
+
+register(
     id='Maze1203Env-v3',
     entry_point='gym.envs.my_games:Maze1203Env3',
     max_episode_steps=2000,
