@@ -27,7 +27,7 @@ class Maze0523Env3(core.Env):
         dir_path = os.path.dirname(os.path.realpath(__file__))
 
         self.map_data_dir = dir_path + '/MapData'
-        self.save_frame = False
+        self.save_frame = True
         self.loc_hist = [[],[],[],[]]
         self.internal_steps = 0
         os.makedirs(ROOT_DIR+'/frames', exist_ok=True)

@@ -27,7 +27,7 @@ class Maze0522Env2(core.Env):
         dir_path = os.path.dirname(os.path.realpath(__file__))
 
         self.map_data_dir = dir_path + '/MapData'
-        self.save_frame = False
+        self.save_frame = True
         self.loc_hist = [[],[],[],[]]
         self.internal_steps = 0
         os.makedirs(ROOT_DIR+'/frames', exist_ok=True)
@@ -625,7 +625,7 @@ def main(MazeEnv, args):
     rewards = 0
     env.brch_weights = args.weights
     steps = 0
-    nepisodes = 128
+    nepisodes = 2
 
     # set up MPI
     from mpi4py import MPI
@@ -683,8 +683,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     
     parser.add_argument('--control', type=int, default=0, choices=[0, 1])
-    parser.add_argument('--save_frame', type=int, default=0, choices=[0, 1])
-    parser.add_argument('--render', type=int, default=0, choices=[0, 1])
+    parser.add_argument('--save_frame', type=int, default=1, choices=[0, 1])
+    parser.add_argument('--render', type=int, default=1, choices=[0, 1])
 
     parser.add_argument('--mode', type=str, default='test', choices=['train', 'test', 'fitu'])
     parser.add_argument('--env', type=str, default='Maze0522Env2')
@@ -692,6 +692,7 @@ if __name__ == '__main__':
     parser.add_argument('--weights', type=list, default=[2, 1, 1])
     # [1, 1, 1]
     # mean, std = 55.12, 5.43
+    # basemean = 11.41, std = 2.54
     args = parser.parse_args()
 
     maze = Maze0522Env2
