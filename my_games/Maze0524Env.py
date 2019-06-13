@@ -691,6 +691,7 @@ if __name__ == '__main__':
     parser.add_argument('--weights', type=list, default=[2, 1, 1, 4, 8])
     # [2, 1, 1, 8, 8], [2, 1, 1, 4, 4]
     # mean, std = 38.05, 3.78, trials = 128
+    # base mean = 2.33, std = 0.95
     args = parser.parse_args()
 
     maze = Maze0524Env
