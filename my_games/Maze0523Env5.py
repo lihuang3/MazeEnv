@@ -625,7 +625,7 @@ def main(MazeEnv, args):
     rewards = 0
     env.brch_weights = args.weights
     steps = 0
-    nepisodes = 128
+    nepisodes = 2
 
     # set up MPI
     from mpi4py import MPI
@@ -682,9 +682,9 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--control', type=int, default=0, choices=[0, 1])
-    parser.add_argument('--save_frame', type=int, default=0, choices=[0, 1])
+    parser.add_argument('--save_frame', type=int, default=1, choices=[0, 1])
     
-    parser.add_argument('--render', type=int, default=0, choices=[0, 1])
+    parser.add_argument('--render', type=int, default=1, choices=[0, 1])
 
     parser.add_argument('--mode', type=str, default='test', choices=['train', 'test', 'fitu'])
     parser.add_argument('--env', type=str, default='Maze0523Env5')
@@ -692,7 +692,7 @@ if __name__ == '__main__':
     parser.add_argument('--weights', type=list, default=[8, 4, 1, 1, 1])
     # [8, 4, 2, 1, 2], [4, 4, 1, 1, 1]
     # mean, std = 54.99, 3.92
-
+    # basemean = 3.23, std = 1.42
     args = parser.parse_args()
 
     maze = Maze0523Env5
