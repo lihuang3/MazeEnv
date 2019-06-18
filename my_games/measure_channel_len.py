@@ -4,14 +4,12 @@ from skimage.morphology import skeletonize_3d as skel_3d
 import random, skimage
 ROOT_PATH = os.path.abspath('./MapData')
 
-mapfile = 'map0522'
-filename = 'map0522'
+mapfile = 'map0524'
+filename = 'map0524'
 
 # Load hand-craft binary maze
 
 mazeData = np.loadtxt(os.path.join(ROOT_PATH, mapfile+'.txt')).astype(int)
-np.savetxt('{}/{}.csv'.format(ROOT_PATH, filename), mazeData, fmt= '%3d')
-np.savetxt('{}/{}_freespace.csv'.format(ROOT_PATH, filename), mazeData, fmt= '%3d')
 
 dir_dict1 = [[-1, 0], [0, -1], [1, 0], [0, 1], [1, 1], [1, -1], [-1, 1], [-1, -1]]
 dir_dict1_map1 = {0: [-1, 0], 1:[0, -1], 2:[1, 0], 3:[0, 1], 4:[1, 1], 5:[1, -1], 6:[-1, 1], 7:[-1, -1]}
@@ -24,13 +22,22 @@ dir_dict3 = [[-1, -1], [1, -1], [1, 1], [-1, 1]];
 # Method: breadth-first search
 
 import skimage
-fig = skimage.io.imread(os.path.join(ROOT_PATH, mapfile+'.png'), as_gray=True)
+raw_img = plt.imread(os.path.join(ROOT_PATH, mapfile+'.png'))
+bw = raw_img[:,:,0]
+bw[bw<1] = 0
+skel = np.asarray(skel_3d(bw), dtype=np.int16)/255
 
-skel = np.asarray(skel_3d(fig), dtype=int) / 255
-# skel[32, 146]  = 1
-# skel_Frontier = [[32, 146]]
+## For Map0522
+# start = [77, 453]
 
-skel_Frontier = [[107, 445]]
+## For Map 523
+# start = [183, 450]
+
+## For map 0524
+start = [213, 570]
+
+
+skel_Frontier = [start]
 
 cost = 100
 pgradSkel = np.copy(skel)
@@ -72,7 +79,7 @@ for item in brchpt:
     skel[item[0], item[1]] = 3
 
 
-plt.imshow(fig)
+plt.imshow(raw_img)
 plt.show()
 
 brch_len = []

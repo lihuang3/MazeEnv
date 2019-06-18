@@ -42,7 +42,7 @@ for row, col in zip(rows, cols):
 
 dir_dict1 = [[-1, 0], [0, -1], [1, 0], [0, 1], [1, 1], [1, -1], [-1, 1], [-1, -1]]
 dir_dict2 = [[-1, 0], [0, -1], [1, 0], [0, 1]]
-dir_dict3 = [[-1, -1], [1, -1], [1, 1], [-1, 1]];
+dir_dict3 = [[-1, -1], [1, -1], [1, 1], [-1, 1]]
 skel_Frontier = []
 
 while len(BSF_Frontier)>0:
