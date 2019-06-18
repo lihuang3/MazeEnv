@@ -689,7 +689,8 @@ if __name__ == '__main__':
     parser.add_argument('--env', type=str, default='Maze0522Env3')
     parser.add_argument('--nsteps', type=int, default=230)
     parser.add_argument('--nepisodes', type=int, default=128)
-    parser.add_argument('--weights', type=list, default=[2, 1, 4, 8])
+    parser.add_argument('--weights', type=lambda s:[int(item) for item in s.split(',')], default='2, 1, 4, 8')
+
     # [1, 1, 8, 8] , [2, 1, 8, 8]
     # mean, std = 56.92, 4.73
     # basemean = 6.38, std = 1.98

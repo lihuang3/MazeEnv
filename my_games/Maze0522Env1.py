@@ -694,7 +694,8 @@ if __name__ == '__main__':
     parser.add_argument('--nsteps', type=int, default=280)
     parser.add_argument('--nepisodes', type=int, default=128)
 
-    parser.add_argument('--weights', type=list, default=[1, 1, 8, 8])
+    parser.add_argument('--weights', type=lambda s:[int(item) for item in s.split(',')], default='1, 1, 8, 8')
+
     # [1, 1, 4, 1], [1, 1, 8, 1], [1, 1, 4, 4]
     # mean, std = 49.18, 4.53
     # basemean = 5.74, std = 2.13
