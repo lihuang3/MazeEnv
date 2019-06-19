@@ -158,10 +158,6 @@ outlet_Frontier = endpoint
 pgradSkel[pgradSkel>=100] -= 99
 endpoint = np.asarray(endpoint, dtype=np.int16)
 
-
-
-
-
 brch_level = {}
 
 brch_dict = {}
@@ -435,9 +431,9 @@ for idx, item in enumerate(endpoint_brchpts_dict):
     Arrow visual
     """
     # --------------------------
-    line1 = [brchs[0] - 3 * slope[1], brchs[0]]
+    line1 = [brchs[0] - 2 * slope[1], brchs[0]]
     y1, x1 = (line1[0][0], line1[1][0]), (line1[0][1], line1[1][1])
-    line2 = [brchs[0] + np.dot(dir, 5), brchs[0] + np.dot(dir, 15)]
+    line2 = [brchs[0] + np.dot(dir, 8), brchs[0] + np.dot(dir, 18)]
     y2, x2 = (line2[0][0], line2[1][0]), (line2[0][1], line2[1][1])
     arrow1.add((x1, y1))
     arrow2.add((x2, y2))
@@ -478,7 +474,7 @@ for idx, item in enumerate(endpoint_brchpts_dict):
         Arrow visual
         """
         # --------------------------
-        line1 = [brchs[i] - 3*slope[1], brchs[i]]
+        line1 = [brchs[i] - 2*slope[1], brchs[i]]
         y1, x1 = (line1[0][0], line1[1][0]), (line1[0][1], line1[1][1])
         line2 = [brchs[i] + np.dot(dir,5), brchs[i] + np.dot(dir,15)]
         y2, x2 = (line2[0][0], line2[1][0]), (line2[0][1], line2[1][1])
@@ -493,21 +489,21 @@ tmp_fig = np.copy(raw_img)
 plt.imshow(tmp_fig)
 for item in arrow1:
     x, y = item[0], item[1]
-    plt.arrow(x[0], y[0], x[1]-x[0], y[1]-y[0], head_width=8, head_length=8, fc='k', ec='k')
+    plt.arrow(x[0], y[0], x[1]-x[0], y[1]-y[0], head_width=8, head_length=8, fc='r', ec='r', width=2)
 for item in arrow2:
     x, y = item[0], item[1]
-    plt.arrow(x[0], y[0], x[1]-x[0], y[1]-y[0], head_width=5, head_length=5, fc='r', ec='r')
+    plt.arrow(x[0], y[0], x[1]-x[0], y[1]-y[0], head_width=5, head_length=5, fc='b', ec='b', width=1)
 
 plt.axis('off')
 fig.tight_layout()
-# fig.subplots_adjust \
-#     (top=0.98,
-# bottom=0.04,
-# left=0.04,
-# right=0.985,
-# hspace=0.2,
-# wspace=0.2)
-# plt.savefig( os.path.join(ROOT_PATH, filename+'_arrow.png'), pad_inches=0.0, dpi=100)
+fig.subplots_adjust \
+    (top=0.98,
+bottom=0.04,
+left=0.04,
+right=0.985,
+hspace=0.2,
+wspace=0.2)
+plt.savefig( os.path.join(ROOT_PATH, filename+'_arrow.png'), pad_inches=0.0, dpi=100)
 
 plt.show()
 
@@ -597,5 +593,5 @@ left=0.04,
 right=0.985,
 hspace=0.2,
 wspace=0.2)
-plt.savefig( os.path.join(ROOT_PATH, filename+'_patch.png'), pad_inches=0.0, dpi=100)
+# plt.savefig( os.path.join(ROOT_PATH, filename+'_patch.png'), pad_inches=0.0, dpi=100)
 plt.show()
