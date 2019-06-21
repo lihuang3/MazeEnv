@@ -144,6 +144,12 @@ register(
 
 
 register(
+    id='Maze0519Env-v3',
+    entry_point='gym.envs.my_games:Maze0519Env3',
+    max_episode_steps=1500,
+)
+
+register(
     id='Maze0519Env-v2',
     entry_point='gym.envs.my_games:Maze0519Env2',
     max_episode_steps=1500,
@@ -183,6 +189,12 @@ register(
     id='Maze1204Env-v1',
     entry_point='gym.envs.my_games:Maze1204Env1',
     max_episode_steps=3000,
+)
+
+register(
+    id='Maze1203Env-v5',
+    entry_point='gym.envs.my_games:Maze1203Env5',
+    max_episode_steps=1500,
 )
 
 register(
