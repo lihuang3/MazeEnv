@@ -14,7 +14,8 @@ from gym.utils import seeding
 
 from time import sleep
 plt.ion()
-
+from scipy.stats import gaussian_kde
+ROOT_DIR = os.path.abspath("./")
 
 
 class Maze0122Env1(core.Env):
@@ -22,7 +23,11 @@ class Maze0122Env1(core.Env):
         global mazeData, costData, freespace, mazeHeight, mazeWidth, robot_marker
         dir_path = os.path.dirname(os.path.realpath(__file__))
 
-        self.map_data_dir = dir_path+'/MapData'
+        self.map_data_dir = dir_path + '/MapData'
+        self.save_frame = True
+        self.loc_hist = [[],[],[],[]]
+        self.internal_steps = 0
+        os.makedirs(ROOT_DIR+'/frames', exist_ok=True)
 
         robot_marker = 150
         self.goal_range = 20
@@ -34,6 +39,8 @@ class Maze0122Env1(core.Env):
                            (-1, 0):4, (-1, -1):5, (0, -1):6, (1, -1):7}
         self.n_actions = len(self.actions)
         self.action_space = spaces.Discrete(self.n_actions)
+        self.goal = np.array([204, 96])
+
         mazeData, costData, freespace = self._load_data(self.map_data_dir)
         mazeHeight, mazeWidth = mazeData.shape
         self.observation_space = spaces.Box(low=0, high=255, shape=(mazeHeight, mazeWidth, 1), dtype=np.uint8)
@@ -41,7 +48,6 @@ class Maze0122Env1(core.Env):
         self.maze = np.ones((mazeHeight, mazeWidth))-mazeData
         self.freespace = np.ones((mazeHeight, mazeWidth))-freespace
 
-        self.goal = np.array([204, 96])
         self.init_state = []
         self.reset()
 
@@ -52,20 +58,19 @@ class Maze0122Env1(core.Env):
 
     def _load_data(self, data_directory):
         filename = 'map0122'
+        RGBmap = 'map0122'
+        self.raw_img = plt.imread(data_directory + '/'+RGBmap+'.png')
         mazeData = np.loadtxt(data_directory + '/'+filename+'.csv').astype(int)
         freespace = np.loadtxt(data_directory + '/'+filename+'_freespace.csv').astype(int)
         costData = np.loadtxt(data_directory + '/' +filename+ '_costmap.csv').astype(int)
         return mazeData, costData, freespace
 
     def _build_robot(self):
-      # ======================
-      # For transfer learning only
-        self.tflearn = False
-        self.cur_robot = None
-      # ======================
+        self.internal_steps = 0
+
         row, col = np.nonzero(freespace)
         self.reward_grad = np.zeros(40).astype(np.uint8)
-        self.robot_num = 512 #len(row)
+        self.robot_num = 1024 #len(row)
         self.robot = random.sample(range(row.shape[0]), self.robot_num)
         self.state = np.zeros(np.shape(mazeData)).astype(int)
         self.state_img = np.copy(self.state)
@@ -86,13 +91,11 @@ class Maze0122Env1(core.Env):
     def step(self, action):
 
         info = {}
+        self.action = action
+        # For sticky action rendering usage
 
-        # =====================
-        # Transfer learning
-        if self.tflearn:
-          action = self.instructor()
-          info = {'ac': action}
-        # =====================
+        self.loc_hist[self.internal_steps % 4] = self.loc
+        self.internal_steps += 1
 
         dy, dx = self.action_map[action]
 
@@ -113,7 +116,10 @@ class Maze0122Env1(core.Env):
         return(np.expand_dims(self.output_img,axis=2),reward,done,info)
 
     def get_reward(self):
-        cost_to_go = np.sum(costData[self.loc[:, 0], self.loc[:, 1]])
+        cost_arr = costData[self.loc[:, 0], self.loc[:, 1]]
+        cost_to_go = np.sum(cost_arr)
+        cost_arr = cost_arr[cost_arr<=self.goal_range]
+        self.delivery_rate = delivery_rate = cost_arr.shape[0]/ self.robot_num
 
         max_cost_agent = np.max(costData[self.loc[:, 0], self.loc[:, 1]])
 
@@ -205,7 +211,7 @@ class Maze0122Env1(core.Env):
             reward += 2                                    
         return done, reward
 
-    def render(self, mode = 'human'):
+    def render2(self, mode = 'human'):
         plt.gcf().clear()
 
         render_image = np.copy(0*self.maze).astype(np.int16)
@@ -237,28 +243,60 @@ class Maze0122Env1(core.Env):
     def reset(self):
         return self._build_robot()
 
-    def transfer_learning(self):
-        if not self.tflearn:
-            self.tflearn = True
-            self.cur_robot = np.argmax(costData[self.loc[:, 0], self.loc[:, 1]])
+    def render_config(self, loc, dot_size=15):
+        # Load high-resolution
+        plt.imshow(self.raw_img)
+        h, w, _ = self.raw_img.shape
+        h1, w1 = self.maze.shape
+        # Draw goal range
+        circle = plt.Circle((float(w)/w1*self.goal[1], float(h)/h1*self.goal[0]), 40, linestyle='-', color='red', linewidth=2, fill=False)
+        plt.gcf().gca().add_artist(circle)
 
-    def instructor(self):
+        text_str = '%.1f'%(100*self.delivery_rate) + ' %'
+        plt.text(w-150, 50, text_str, fontsize=16)
 
-        _cost_to_goal = costData[self.loc[self.cur_robot, 0], self.loc[self.cur_robot, 1]]
-        if _cost_to_goal < 5:
-          self.cur_robot = np.argmax(costData[self.loc[:, 0], self.loc[:, 1]])
-          _cost_to_goal = costData[self.loc[self.cur_robot, 0], self.loc[self.cur_robot, 1]]
+        dir = self.action_map[self.action]
+        offset = 100
+        plt.arrow(w-offset, h-offset, 30*dir[1], 30*dir[0], head_width=10, head_length=10, fc='k', ec='k')
+        # Configure robot density
+        ys, xs =float(h)/h1*loc[:,0], float(w)/w1*loc[:,1]
+        xy = np.vstack([xs, ys])
+        z = gaussian_kde(xy)(xy)
+        idx = z.argsort()
+        xs, ys, z = xs[idx], ys[idx], z[idx]
+        cmap = mpl.cm.get_cmap('Blues')
+        upperZ = max(z)
+        lowerZ = min(z)
+        norm = mpl.colors.Normalize(vmin = lowerZ, vmax=upperZ)
+        z[z<0.7*upperZ] = 0.7*upperZ
+        colors = [cmap(norm(value)) for value in z]
+        # Draw robots
+        plt.scatter(xs, ys, c=colors, s=dot_size, edgecolor='')
 
-        for i in range(-1, 2):
-          for j in range(-1, 2):
-            if not (i == 0 and j == 0):
-              new_pt = self.loc[self.cur_robot, :] + np.array([i, j]).astype(int)
-              new_cost = costData[new_pt[0], new_pt[1]]
-              if new_cost > 0 and new_cost < _cost_to_goal:
-                action = self.rev_action_map.get((i, j))
-                _cost_to_goal = np.copy(new_cost)
+    def render(self, mode = 'human'):
+        for i in range(4):
+            loc = self.loc_hist[i]
+            plt.gcf().clear()
 
-        return action
+            self.render_config(loc)
+            if self.save_frame:
+                h, w, _ = self.raw_img.shape
+                fig = plt.gcf()
+                fig.set_size_inches(10, h*10.0/w)
+                filename = ROOT_DIR + '/frames/' + 'fig' + '%05d' % (1 + len(os.listdir(ROOT_DIR + '/frames'))) + '.png'
+                plt.axis('off')
+                fig.tight_layout()
+                fig.subplots_adjust\
+                        (top=1.0,
+                        bottom=0.0,
+                        left=0.0,
+                        right=1.0,
+                        hspace=0.0,
+                        wspace=0.0)
+                plt.savefig(filename, pad_inches=0.0, dpi=100)
+            else:
+                plt.show(False)
+                plt.pause(0.0001)
 
     def expert(self, robot_id):
 

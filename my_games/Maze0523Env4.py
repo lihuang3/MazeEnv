@@ -81,11 +81,6 @@ class Maze0523Env4(core.Env):
         self.internal_steps = 0
         self.delivery_rate_thresh = 0.0
 
-        # ======================
-        # For transfer learning only
-        self.tflearn = False
-        self.cur_robot = None
-        # ======================
         row, col = np.where(np.logical_and(self.pgradData<=self.init_range, self.pgradData>0 ))
         self.reward_grad = np.zeros(40).astype(np.uint8)
         self.robot_num = 8  # len(row)
