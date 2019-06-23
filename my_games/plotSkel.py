@@ -4,8 +4,8 @@ from skimage.morphology import skeletonize_3d as skel_3d
 import random, skimage
 ROOT_PATH = os.path.abspath('./MapData')
 
-mapfile = 'map0523'
-filename = 'map0523'
+mapfile = 'map0524'
+filename = 'map0524'
 
 # Load hand-craft binary maze
 raw_img = plt.imread(os.path.join(ROOT_PATH, mapfile+'.png'))
@@ -34,10 +34,10 @@ tmp_fig[skel==1,:] = 0
 # start = [77, 453]
 
 ## For Map 523
-start = [183, 450]
+# start = [183, 450]
 
 ## For map 0524
-# start = [213, 570]
+start = [213, 570]
 
 plt.imshow(tmp_fig)
 plt.show()
@@ -53,8 +53,8 @@ pgrad = np.copy(bw)
 flowMapCol = 0 * bw
 flowMapRow = 0 * bw
 
-goal1 =[61, 56]
-goal2 = [37, 36]
+goal1 = [52, 69]
+goal2 = [278, 64]
 goal1 = [int(goal1[0]*h/h1), int(goal1[1]*w/w1)]
 goal2 = [int(goal2[0]*h/h1), int(goal2[1]*w/w1)]
 ## for map0522
@@ -197,16 +197,16 @@ tmp_fig = np.copy(pgrad)/np.max(pgrad)
 
 import matplotlib as mpl
 fig = plt.gcf()
-fig.set_size_inches(10, 10)
+fig.set_size_inches(10, 9.)
 rows, cols = np.where(skel>0)
 for row, col in zip(rows, cols):
     tmp_fig[row, col] = 0
-plt.imshow(tmp_fig, cmap=mpl.cm.get_cmap("jet"))
+plt.imshow(tmp_fig, cmap=mpl.cm.get_cmap("viridis"))
 
 
-circle1 = plt.Circle((goal1[1], goal1[0]), 15, linestyle='-', color='blue',
+circle1 = plt.Circle((goal1[1], goal1[0]), 15, linestyle='-', color='red',
                     linewidth=2, fill=False)
-circle2 = plt.Circle((goal2[1], goal2[0]), 15, linestyle='-', color='green',
+circle2 = plt.Circle((goal2[1], goal2[0]), 15, linestyle='-', color='blue',
                     linewidth=2, fill=False)
 
 plt.gcf().gca().add_artist(circle1)
@@ -219,19 +219,19 @@ for item in brch_level:
     plt.gcf().gca().add_artist(circle)
 
 
-plt.colorbar(fraction=0.08, pad=0.04)
+plt.colorbar(fraction=0.046, pad=0.04)
 
 
 plt.axis('off')
 fig.tight_layout()
 fig.subplots_adjust \
-    (top=0.979,
-bottom=0.024,
+    (top=0.983,
+bottom=0.026,
 left=0.051,
-right=0.979,
-hspace=0.2,
-wspace=0.2)
-# plt.savefig( os.path.join(ROOT_PATH, filename+'_profile.png'), pad_inches=0.0, dpi=100)
+right=0.953,
+hspace=0.0,
+wspace=0.0)
+plt.savefig( os.path.join(ROOT_PATH, filename+'_profile.png'), pad_inches=0.0, dpi=100)
 
 
 plt.show()

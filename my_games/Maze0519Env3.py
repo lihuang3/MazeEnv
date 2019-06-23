@@ -70,7 +70,7 @@ class Maze0519Env3(core.Env):
 
         row, col = np.nonzero(freespace)
         self.reward_grad = np.zeros(40).astype(np.uint8)
-        self.robot_num = 256 #len(row)
+        self.robot_num = 1024 #len(row)
         self.robot = random.sample(range(row.shape[0]), self.robot_num)
         self.state = np.zeros(np.shape(mazeData)).astype(int)
         self.state_img = np.copy(self.state)
